@@ -1,17 +1,22 @@
 footer.footer
 	br
 	p.text-center
-		span.text-default Designed with love by Preston Lee for desktop and mobile browsers.
+		span.text-default
+			span.glyphicon.glyphicon-heart
+			|  Designed with love by Preston Lee for desktop and tablet browsers.
 		br
 		small
 			span
+				= link_to text_with_icon('API Usage', 'transfer'), api_path
+			|  | 
+			span
 				a href="https://github.com/preston/bibler/issues"
-					span.icon.icon-github
+					span.glyphicon.glyphicon-flash
 					|  Bug Reports &amp; Feature Requests
 			|  | 
 			span
 				a href="https://www.linkedin.com/in/prestonvictorlee"
-					span.icon.icon-linkedin
+					span.glyphicon.glyphicon-user
 					|  Author
 			|  |  
 			span &copy; #{Time.now.year} Preston Lee

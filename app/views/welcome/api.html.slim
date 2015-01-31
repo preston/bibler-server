@@ -1,0 +1,75 @@
+- bible = Bible.first
+- book = Book.first
+
+.container-fluid
+	.row
+		.col-sm-3
+			h2 = text_with_icon 'Developer API', 'transfer'
+			p #{link_to 'Bibler', root_path} supports a RESTful JSON API for developing your own mashups.
+			p Developers are free to integrate Bibler into custom applications. It's fine to use the public site for light development and testing purposes, but you'll be blocked if you make excessive production requests. If you're integrating with a heavy production app, you should deploy your own copy of #{link_to 'Bibler', root_path}. 
+			/ ul
+				li
+					h3
+						a href="#bibles" Get Bibles
+				li
+					h3
+						a href="#books" Get Books
+				li
+					h3
+						a href="#chapters" Get Chapters
+				li
+					h3
+						a href="#verses" Get Verses
+				li
+					h3
+						a href="#search" Bible Search
+		.col-sm-9
+			.well#bibles
+				- verseShowUrl = verse_lookup_url(bible: bible, book: book, chapter: 1, ordinal: 1, format: :json)
+				h4
+					small GET 
+					|  the global bible list
+				p = verseShowUrl
+				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#bibles_result" aria-expanded="false" aria-controls="bibles_result" = text_with_icon 'Show Result', 'eye-open'
+				blockquote.collapse#bibles_result
+					small ng-include="'#{verseShowUrl}'"
+
+			.well#books
+				- booksUrl = books_url(format: :json)
+				h4
+					small GET 
+					|  the global book list
+				p = booksUrl
+				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#books_result" aria-expanded="false" aria-controls="books_result" = text_with_icon 'Show Result', 'eye-open'
+				blockquote.collapse#books_result
+					small ng-include="'#{booksUrl}'"
+
+			.well#chapters
+				- chaptersUrl = bible_book_chapters_url(bible: bible, book: book, format: :json)
+				h4
+					small GET 
+					|   chapter list for a bible book
+				p = chaptersUrl
+				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#chapters_result" aria-expanded="false" aria-controls="chapters_result" = text_with_icon 'Show Result', 'eye-open'
+				blockquote.collapse#chapters_result
+					small ng-include="'#{chaptersUrl}'"
+
+			.well#verses
+				- versesUrl = bible_book_chapter_verses_url(bible: bible, book: book, chapter: 1, format: :json)
+				h4
+					small GET 
+					|   all verses of a bible book
+				p = versesUrl
+				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#verses_result" aria-expanded="false" aria-controls="verses_result" = text_with_icon 'Show Result', 'eye-open'
+				blockquote.collapse#verses_result
+					small ng-include="'#{versesUrl}'"
+
+			.well#search
+				- searchUrl = bible_search_url(bible: bible, format: :json)
+				h4
+					small POST
+					|  a full text bible search
+				p = searchUrl
+				h6 parameters
+				blockquote
+					| {text: 'jesus christ'} // required

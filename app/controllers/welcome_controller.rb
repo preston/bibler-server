@@ -1,6 +1,6 @@
 class WelcomeController < ApplicationController
 
-	layout false, only: [:reader, :comparator, :search]
+	layout false, except: [:index, :api]
 
 	def index
 	end
@@ -14,10 +14,7 @@ class WelcomeController < ApplicationController
 	def search
 	end
 
-	# def robots
-	# 	respond_to do |format|
-	# 		format.txt { Verse.all }
-	# 	end		
-	# end
+	def api
+	end
 
 end
