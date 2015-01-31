@@ -16,7 +16,7 @@ Bibler is a Rails app for the Ruby 2.2+ compatible runtimes, built with AngularJ
 # Updating The Static Sitemap
 
 	# Edit your config/sitemap.rb to point to your own URL.
-    rake sitemap:refresh # Only do this with a fully-loaded database!
+    rake sitemap:refresh # Only do this with a fully-loaded database! It'll take a while.
 
 
 # Attribution

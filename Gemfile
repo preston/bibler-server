@@ -28,7 +28,11 @@ gem 'friendly_id'
 
 # Use Capistrano for deployment
 group :development do
-	gem 'capistrano-rails'
+  gem 'capistrano-rvm'
+  gem 'capistrano-rails-console'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rails'
+  gem 'capistrano-passenger'
   gem 'sitemap_generator'
 end
 
