@@ -1,4 +1,8 @@
 $icon-font-path: "../assets/bootstrap/";
+// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "theme";
 
 /*
  * This is a manifest file that'll be compiled into application.css, which will include all the files
@@ -18,10 +22,6 @@ $icon-font-path: "../assets/bootstrap/";
  // *= require theme
  */
 
-// "bootstrap-sprockets" must be imported before "bootstrap" and "bootstrap/variables"
-@import "bootstrap-sprockets";
-@import "bootstrap";
-@import "theme";
 
 textarea:invalid,
 input:invalid {
