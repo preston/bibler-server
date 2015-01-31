@@ -14,4 +14,10 @@ class WelcomeController < ApplicationController
 	def search
 	end
 
+	# def robots
+	# 	respond_to do |format|
+	# 		format.txt { Verse.all }
+	# 	end		
+	# end
+
 end

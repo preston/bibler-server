@@ -29,6 +29,7 @@ gem 'friendly_id'
 # Use Capistrano for deployment
 group :development do
 	gem 'capistrano-rails'
+  gem 'sitemap_generator'
 end
 
 group :development, :test do
