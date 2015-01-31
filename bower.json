@@ -8,8 +8,7 @@
       "angular-relative-date" : "latest",
       "ng-form-data" : "latest",
       "angular-growl-v2" : "latest",
-      "angular-animate" : "latest",
-      "angular-ui-utils" : "latest"
+      "angular-animate" : "latest"
     }
   },
   "vendor": {
