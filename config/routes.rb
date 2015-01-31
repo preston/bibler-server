@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   get 'welcome/reader', as: :reader
   get 'welcome/comparator', as: :comparator
   get 'welcome/search', as: :search
-  get 'welcome/api', as: :api
+  get '/api' => 'welcome#api', as: :api
 
   resources :testaments, only: [:index, :show]
   resources :books, only: [:index, :show]
