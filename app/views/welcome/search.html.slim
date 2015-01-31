@@ -2,8 +2,8 @@
 	br
 	.well
 		.row
-			.col-sm-4
-				form.form-horizontal role="form"
+			.col-sm-6
+				form.form-horizontal role="form" ng-submit="search()"
 					.form-group
 						label for="bible_select"
 							= text_with_icon 'Bible', 'book'
@@ -11,16 +11,19 @@
 					.form-group
 						label for="bible_search_text"
 							= text_with_icon 'Full Text Search', 'search'
-						input.form-control type="search" ng-model="search.text" autofocus="true" ng-change="search()"
-						p.help-block Use spaces to seperate multiple words.
-			.col-sm-8
+						input.form-control type="search" ng-model="search.text" autofocus="true"
+						/ p.help-block Use spaces to seperate multiple words.
+					.form-group
+						button.btn.btn-primary type="submit" = text_with_icon 'Search', 'search'
+						span ng-show="verses.length > 0"
+							i  Results: 
+							span.badge ng-bind="verses.length"
+							i.text-danger ng-show="verses.length >= 100"  (limited)
+
+			.col-sm-6
 				h3
 					= text_with_icon 'What does this do?', 'search'
-				p.help-block The tool allows you to search the entire bible, based on the translation of your choosing. Results are limited to 100 per query.
-				span ng-show="verses.length > 0"
-					i Results: 
-					span.badge ng-bind="verses.length"
-					i.text-danger ng-show="verses.length >= 100"  (limited)
+				p.help-block The tool allows you to search the entire bible, based on the translation of your choosing. You may seperate multiple words using spaces, though results are limited to 100 per query.
 
 	div ng-show="verses.length > 0"
 		table.table.table-condensed.table-striped
