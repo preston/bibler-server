@@ -50,7 +50,7 @@ namespace :deploy do
 
 end
 
-
+# Hack from: https://gist.github.com/corny/7459729
 # Overwrite the 'deploy:updating' task.
 Rake::Task["deploy:updating"].clear_actions
 namespace :deploy do

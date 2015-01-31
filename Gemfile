@@ -25,6 +25,8 @@ gem 'slim-rails'
 
 gem 'friendly_id'
 
+# Required at deploy time.
+gem 'therubyracer'
 
 # Use Capistrano for deployment
 group :development do
