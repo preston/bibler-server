@@ -4,9 +4,9 @@ class VersesController < ApplicationController
 
   SEARCH_LIMIT = 100
 
-  def index
-    @verses = Verse.all
-  end
+  # def index
+  #   @verses = Verse.all
+  # end
 
   def show
     @verse = Verse.where(bible: @bible, book: @book, chapter: params[:chapter], ordinal: params[:ordinal]).first

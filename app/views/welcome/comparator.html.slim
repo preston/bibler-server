@@ -17,22 +17,22 @@
 							= text_with_icon 'Chapter', 'bookmark'
 						select#book_select.form-control ng-model="selectedChapter" ng-options="chapter for chapter in chapters" ng-change="selectChapter()"
 
-				.col-sm-6.form-group
-					label for="bible_select_right"
-						= text_with_icon 'Bible (Right)', 'book'
-					select#bible_select_right.form-control ng-model="selectedBibleRight" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBibleRight()"
+				.col-sm-6
+					.form-group
+						label for="bible_select_right" = text_with_icon 'Bible (Right)', 'book'
+						select#bible_select_right.form-control ng-model="selectedBibleRight" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBibleRight()"
+					.form-group
+						label = text_with_icon('Text Filter', 'search')
+						input.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
 					h3 What is this for?
 					p.help-block The translation comparator allows you to read side-by-side version of the same passege from multiple translation sources. This is useful when trying to understand semantics than can be lost or misinterpreted in translation.
-				.col-sm-12.form-group
-					.input-group
-						span.input-group-addon
-							span.glyphicon.glyphicon-search
-						input.input-lg.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
-
+					span ng-show="verses.length > 0"
+						i Verses: 
+						span.badge ng-bind="verses.length"
 
 	#sideBySide
 		.row
-			.col-lg-6
+			.col-sm-6
 				table.table.table-condensed.table-striped ng-show="versesLeft.length > 0"
 					thead
 						tr
@@ -46,8 +46,8 @@
 					tbody
 						tr ng-repeat="v in versesLeft | filter:search.text | orderBy:predicate:reverse"
 							td ng-bind="v.ordinal"
-							td ng-bind="v.text"
-			.col-lg-6
+							td ng-bind-html="v.text | highlight:search.text"
+			.col-sm-6
 				table.table.table-condensed.table-striped ng-show="versesRight.length > 0"
 					thead
 						tr
@@ -58,6 +58,6 @@
 					tbody
 						tr ng-repeat="v in versesRight | filter:search.text | orderBy:predicate:reverse"
 							td ng-bind="v.ordinal"
-							td ng-bind="v.text"
+							td ng-bind-html="v.text | highlight:search.text"
 
 

@@ -15,12 +15,17 @@
 			.col-sm-8
 				h3 What does this do?
 				p.help-block The tool allows you to search the entire bible, based on the translation of your choosing. Results are limited to 100 per query.
+				span ng-show="verses.length > 0"
+					i Results: 
+					span.badge ng-bind="verses.length"
+					i.text-danger ng-show="verses.length >= 100"  (limited)
 
 	div ng-show="verses.length > 0"
-
 		table.table.table-condensed.table-striped
 			thead
 				tr
+					th.col-sm-1
+						a ng-click="reverse = !reverse; predicate = 'book.name'; " Book
 					th.col-sm-1
 						a ng-click="reverse = !reverse; predicate = 'chapter'; " Chapter
 					th.col-sm-1
@@ -28,8 +33,9 @@
 					th.col-sm-10
 						a ng-click="reverse = !reverse; predicate = 'text'; " Text
 			tbody
-				tr ng-repeat="v in verses | orderBy:predicate:reverse"
+				tr ng-repeat="v in verses | orderBy:predicate:reverse "
+					td ng-bind="v.book.name"
 					td ng-bind="v.chapter"
 					td ng-bind="v.ordinal"
-					td ng-bind="v.text"
+					td ng-bind-html="v.text | highlight:search.text"
 

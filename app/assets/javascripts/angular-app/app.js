@@ -6,8 +6,8 @@ app = angular.module('BiblerApp', [
 	'ng-form-data',
 	'humanizeFilters',
 	'angular-growl',
+	// 'ui.utils',
 	'ngAnimate',
-	'ui.utils'
 ]);
 
 // For compatibility with Rails CSRF protection

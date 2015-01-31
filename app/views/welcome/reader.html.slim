@@ -8,15 +8,15 @@
 						label for="bible_select"
 							= text_with_icon 'Bible', 'book'
 						select#bible_select.form-control ng-model="selectedBible" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBible()"
-					.form-group
-						label for="book_select"
-							= text_with_icon 'Book', 'user'
-						select#book_select.form-control ng-model="selectedBook" ng-options="book.slug as book.name group by book.testament.name for book in books" ng-change="selectBook()"
-				.col-sm-4
 					.form-group ng-show="chapters.length > 0"
 						label for="chapter_select"
 							= text_with_icon 'Chapter', 'bookmark'
 						select#book_select.form-control ng-model="selectedChapter" ng-options="chapter for chapter in chapters" ng-change="selectChapter()"
+				.col-sm-4
+					.form-group
+						label for="book_select"
+							= text_with_icon 'Book', 'user'
+						select#book_select.form-control ng-model="selectedBook" ng-options="book.slug as book.name group by book.testament.name for book in books" ng-change="selectBook()"
 					.form-group ng-show="verses.length > 0"
 						label for="verse_filter"
 							= text_with_icon 'Text Filter', 'search'
@@ -24,6 +24,9 @@
 				.col-sm-4
 					h3 Eh?
 					p.help-block The chapter reader is for general verse lookup and reading, as well as providing permanent links that you may use in your documents. 
+					span ng-show="verses.length > 0"
+						i Verses: 
+						span.badge ng-bind="verses.length"
 
 	#results ng-show="verses.length > 0"
 		table.table.table-condensed.table-striped
@@ -37,7 +40,7 @@
 			tbody
 				tr ng-repeat="v in verses | filter:search.text | orderBy:predicate:reverse"
 					td ng-bind="v.ordinal"
-					td ng-bind="v.text"
+					td ng-bind-html="v.text | highlight:search.text"
 					td
 						.btn-group
 							a.btn.btn-sm.btn-default href="{{versePermalink(v, 'html')}}"
