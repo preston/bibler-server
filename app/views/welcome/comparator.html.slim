@@ -24,7 +24,8 @@
 					.form-group
 						label = text_with_icon('Text Highlighter', 'search')
 						input.form-control type="search" ng-model="search.text" autofocus="true"
-					h3 What is this for?
+					h3
+						= text_with_icon 'What is this for?', 'adjust'
 					p.help-block The translation comparator allows you to read side-by-side version of the same passege from multiple translation sources. This is useful when trying to understand semantics than can be lost or misinterpreted in translation.
 					span ng-show="verses.length > 0"
 						i Verses: 

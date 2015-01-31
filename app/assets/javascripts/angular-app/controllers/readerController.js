@@ -82,7 +82,7 @@ angular.module('BiblerApp').controller('ReaderController', ['$scope', '$location
 	$scope.verseMailTo = function(verse) {
 		return "subject=" + $scope.bookForSlug($scope.selectedBook).name + '%20' + $scope.selectedChapter + ':' + verse.ordinal
 		+ '%20-%20' + $scope.bibleForSlug($scope.selectedBible).name
-		+ '&body=%22' + verse.text + "%22%0D%0A%0D%0A%0D%0A%0D%0A%20%20%20%20" + $scope.versePermalink(verse, 'html')
+		+ '&body=%22' + verse.text + "%22%0D%0A%0D%0A%20%20%20%20" + $scope.versePermalink(verse, 'html')
 		+ '%0D%0A%0D%0A--%0D%0APowered by Bibler.';
 	}
 

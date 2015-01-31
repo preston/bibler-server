@@ -10,9 +10,9 @@
         span.icon-bar
         span.icon-bar
   
-      a.navbar-brand href="#{root_url}"
+      / a.navbar-brand href="#{root_url}"
         / = image_tag('logo/icon-inverse-128x128.png', width: 16, style: 'display: inline')
-        |  Bibler
+        / |  Bibler
   
   
     .collapse.navbar-collapse#navbar-collapse-1
@@ -26,10 +26,15 @@
         | Christian reference tools and API for English bible translations.
 
 h1
-  = link_to text_with_icon('Bibler', 'book'), root_path
+  a href="/"
+    | &nbsp;
+    span.glyphicon.glyphicon-book
+    |  Bible
+    span.text-info r
   small
-    i (noun)
     b
-      | /ˈbaɪblər/
-    |  :: Christian reference tools and API for English bible translations.
+      | &nbsp;&nbsp;/ˈbaɪblər/
+    span
+      |  (noun)
+    |  :: A Christian reference and API for English bible translations.
     
