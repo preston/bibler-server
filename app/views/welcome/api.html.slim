@@ -25,14 +25,14 @@
 						a href="#search" Bible Search
 		.col-sm-9
 			.well#bibles
-				- verseShowUrl = verse_lookup_url(bible: bible, book: book, chapter: 1, ordinal: 1, format: :json)
+				- biblesUrl = bibles_url format: :json
 				h4
 					small GET 
 					|  the global bible list
-				p = verseShowUrl
+				p = biblesUrl
 				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#bibles_result" aria-expanded="false" aria-controls="bibles_result" = text_with_icon 'Show Result', 'eye-open'
-				blockquote.collapse#bibles_result
-					small ng-include="'#{verseShowUrl}'"
+				pre.collapse#bibles_result
+					small ng-include="'#{biblesUrl}'"
 
 			.well#books
 				- booksUrl = books_url(format: :json)
@@ -41,7 +41,7 @@
 					|  the global book list
 				p = booksUrl
 				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#books_result" aria-expanded="false" aria-controls="books_result" = text_with_icon 'Show Result', 'eye-open'
-				blockquote.collapse#books_result
+				pre.collapse#books_result
 					small ng-include="'#{booksUrl}'"
 
 			.well#chapters
@@ -51,7 +51,7 @@
 					|   chapter list for a bible book
 				p = chaptersUrl
 				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#chapters_result" aria-expanded="false" aria-controls="chapters_result" = text_with_icon 'Show Result', 'eye-open'
-				blockquote.collapse#chapters_result
+				pre.collapse#chapters_result
 					small ng-include="'#{chaptersUrl}'"
 
 			.well#verses
@@ -61,7 +61,7 @@
 					|   all verses of a bible book
 				p = versesUrl
 				button.btn.btn-primary type="button" data-toggle="collapse" data-target="#verses_result" aria-expanded="false" aria-controls="verses_result" = text_with_icon 'Show Result', 'eye-open'
-				blockquote.collapse#verses_result
+				pre.collapse#verses_result
 					small ng-include="'#{versesUrl}'"
 
 			.well#search
@@ -71,5 +71,5 @@
 					|  a full text bible search
 				p = searchUrl
 				h6 parameters
-				blockquote
+				pre
 					| {text: 'jesus christ'} // required
