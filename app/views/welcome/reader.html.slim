@@ -19,8 +19,8 @@
 						select#book_select.form-control ng-model="selectedBook" ng-options="book.slug as book.name group by book.testament.name for book in books" ng-change="selectBook()"
 					.form-group ng-show="verses.length > 0"
 						label for="verse_filter"
-							= text_with_icon 'Text Filter', 'search'
-						input.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
+							= text_with_icon 'Text Highlighter', 'search'
+						input.form-control type="search" ng-model="search.text" autofocus="true"
 				.col-sm-4
 					h3 Eh?
 					p.help-block The chapter reader is for general verse lookup and reading, as well as providing permanent links that you may use in your documents. 

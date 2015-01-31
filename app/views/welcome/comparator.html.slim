@@ -22,8 +22,8 @@
 						label for="bible_select_right" = text_with_icon 'Bible (Right)', 'book'
 						select#bible_select_right.form-control ng-model="selectedBibleRight" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBibleRight()"
 					.form-group
-						label = text_with_icon('Text Filter', 'search')
-						input.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
+						label = text_with_icon('Text Highlighter', 'search')
+						input.form-control type="search" ng-model="search.text" autofocus="true"
 					h3 What is this for?
 					p.help-block The translation comparator allows you to read side-by-side version of the same passege from multiple translation sources. This is useful when trying to understand semantics than can be lost or misinterpreted in translation.
 					span ng-show="verses.length > 0"

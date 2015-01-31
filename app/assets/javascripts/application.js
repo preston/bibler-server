@@ -6,9 +6,6 @@
 //= require angular-rails-templates
 //= require angular-route
 // 
-// Highlight filter
-//= require angular-ui-utils/ui-utils
-// 
 //  relativeDate display filter
 //= require angular-relative-date
 // 
