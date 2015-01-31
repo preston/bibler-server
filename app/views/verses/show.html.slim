@@ -1,0 +1,16 @@
+.container
+	#verse
+		.jumbotron
+			.row
+				.col-md-3
+					h2.text-uppercase
+						= @book.name
+						= " #{@verse.chapter}:#{@verse.ordinal}"
+					.lead
+						/ | As written in
+						/ br
+						i #{@bible.name}	
+						br
+						span.glyphicon.glyphicon-book aria-hidden="true"
+				.col-md-9
+					h1 &ldquo;#{@verse.text}&rdquo;

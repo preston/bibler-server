@@ -1,0 +1,63 @@
+.container-fluid#reader ng-controller="ComparatorController"
+	br
+	.well
+		form#search_form role="form"
+			.row
+				.col-sm-6.form-group
+					.form-group
+						label for="bible_select_left"
+							= text_with_icon 'Bible (Left)', 'book'
+						select#bible_select_left.form-control ng-model="selectedBibleLeft" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selecteibleLeft()"
+					.form-group
+						label for="book_select"
+							= text_with_icon 'Book', 'user'
+						select#book_select.form-control ng-model="selectedBook" ng-options="book.slug as book.name for book in books" ng-change="updateChapters()"
+					.form-group ng-show="chapters.length > 0"
+						label for="chapter_select"
+							= text_with_icon 'Chapter', 'bookmark'
+						select#book_select.form-control ng-model="selectedChapter" ng-options="chapter for chapter in chapters" ng-change="selectChapter()"
+
+				.col-sm-6.form-group
+					label for="bible_select_right"
+						= text_with_icon 'Bible (Right)', 'book'
+					select#bible_select_right.form-control ng-model="selectedBibleRight" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBibleRight()"
+					h3 What is this for?
+					p.help-block The translation comparator allows you to read side-by-side version of the same passege from multiple translation sources. This is useful when trying to understand semantics than can be lost or misinterpreted in translation.
+				.col-sm-12.form-group
+					.input-group
+						span.input-group-addon
+							span.glyphicon.glyphicon-search
+						input.input-lg.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
+
+
+	#sideBySide
+		.row
+			.col-lg-6
+				table.table.table-condensed.table-striped ng-show="versesLeft.length > 0"
+					thead
+						tr
+							th.col-sm-1
+								a ng-click="reverse = !reverse; predicate = 'ordinal'; "
+									| Verse 
+									span.badge
+										| {{versesLeft.count}}
+							th.col-sm-8
+								a ng-click="reverse = !reverse; predicate = 'text'; " Text
+					tbody
+						tr ng-repeat="v in versesLeft | filter:search.text | orderBy:predicate:reverse"
+							td ng-bind="v.ordinal"
+							td ng-bind="v.text"
+			.col-lg-6
+				table.table.table-condensed.table-striped ng-show="versesRight.length > 0"
+					thead
+						tr
+							th.col-sm-1
+								a ng-click="reverse = !reverse; predicate = 'ordinal'; " Verse
+							th.col-sm-8
+								a ng-click="reverse = !reverse; predicate = 'text'; " Text
+					tbody
+						tr ng-repeat="v in versesRight | filter:search.text | orderBy:predicate:reverse"
+							td ng-bind="v.ordinal"
+							td ng-bind="v.text"
+
+

@@ -1,0 +1,35 @@
+/ .navbar.navbar-default
+
+  .container-fluid
+
+    / Brand and toggle get grouped for better mobile display
+    .navbar-header
+      button.navbar-toggle type="button" data-toggle="collapse" data-target="#navbar-collapse-1"
+        span.sr-only Toggle navigation
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+  
+      a.navbar-brand href="#{root_url}"
+        / = image_tag('logo/icon-inverse-128x128.png', width: 16, style: 'display: inline')
+        |  Bibler
+  
+  
+    .collapse.navbar-collapse#navbar-collapse-1
+  
+  
+      / ul.nav.navbar-nav
+        / li = link_to('Home', root_path)
+        / li = link_to('API Examples', api_path)
+        / li
+      p.navbar-text.navbar-right
+        | Christian reference tools and API for English bible translations.
+
+h1
+  = link_to text_with_icon('Bibler', 'book'), root_path
+  small
+    i (noun)
+    b
+      | /ˈbaɪblər/
+    |  :: Christian reference tools and API for English bible translations.
+    

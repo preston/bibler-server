@@ -1,0 +1,19 @@
+
+#index
+
+	div#tabs role="tabpanel"
+	
+		/ Nav tabs
+		ul.nav.nav-tabs role="tablist"
+			li.active role="presentation"
+				a href="#reader" aria-controls="reader" role="tab" data-toggle="tab" Chapter Reader
+			li role="presentation"
+				a href="#comparator" aria-controls="comparator" role="tab" data-toggle="tab" Translation 	Comparator
+			li role="presentation"
+				a href="#search" aria-controls="search" role="tab" data-toggle="tab" Full Text Search
+	
+		/ Tab panes
+		.tab-content
+			.tab-pane.active#reader role="tabpanel" ng-include="'welcome/reader'"
+			.tab-pane#comparator role="tabpanel" ng-include="'welcome/comparator'"
+			.tab-pane#search role="tabpanel" ng-include="'welcome/search'"

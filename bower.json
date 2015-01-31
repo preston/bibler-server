@@ -1,0 +1,20 @@
+{
+  "lib": {
+    "name": "bower-rails generated lib assets",
+    "dependencies": {
+      "angularjs" : "latest",
+      "angular-route" : "latest",
+      "restangular" : "latest",
+      "angular-relative-date" : "latest",
+      "ng-form-data" : "latest",
+      "angular-growl-v2" : "latest",
+      "angular-animate" : "latest",
+      "angular-ui-utils" : "latest"
+    }
+  },
+  "vendor": {
+    "name": "bower-rails generated vendor assets",
+    "dependencies": {
+    }
+  }
+}

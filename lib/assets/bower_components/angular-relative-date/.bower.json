@@ -1,0 +1,33 @@
+{
+  "name": "angular-relative-date",
+  "version": "0.2.0",
+  "description": "AngularJS filter to provide relative, human-readable dates.",
+  "homepage": "https://github.com/wildlyinaccurate/angular-relative-date",
+  "authors": [
+    "Joseph Wynn <joseph@wildlyinaccurate.com>"
+  ],
+  "keywords": [
+    "angular",
+    "relative",
+    "date"
+  ],
+  "license": "MIT",
+  "main": "./angular-relative-date.js",
+  "dependencies": {
+    "angular": ">=1.0.0",
+    "angular-translate": ">=2.5.2"
+  },
+  "devDependencies": {
+    "angular-mocks": "1.2.x",
+    "angular-translate": ">=2.5.x"
+  },
+  "_release": "0.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.2.0",
+    "commit": "b25c880af52db42454442c38bb1cbd64bd1146f0"
+  },
+  "_source": "git://github.com/wildlyinaccurate/angular-relative-date.git",
+  "_target": "*",
+  "_originalSource": "angular-relative-date"
+}

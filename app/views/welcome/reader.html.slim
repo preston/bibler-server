@@ -1,0 +1,52 @@
+.container-fluid#reader ng-controller="ReaderController"
+	br
+	.well
+		form#search_form role="form"
+			.row
+				.col-sm-4
+					.form-group
+						label for="bible_select"
+							= text_with_icon 'Bible', 'book'
+						select#bible_select.form-control ng-model="selectedBible" ng-options="bible.slug as bible.name for bible in bibles" ng-change="selectBible()"
+					.form-group
+						label for="book_select"
+							= text_with_icon 'Book', 'user'
+						select#book_select.form-control ng-model="selectedBook" ng-options="book.slug as book.name group by book.testament.name for book in books" ng-change="selectBook()"
+				.col-sm-4
+					.form-group ng-show="chapters.length > 0"
+						label for="chapter_select"
+							= text_with_icon 'Chapter', 'bookmark'
+						select#book_select.form-control ng-model="selectedChapter" ng-options="chapter for chapter in chapters" ng-change="selectChapter()"
+					.form-group ng-show="verses.length > 0"
+						label for="verse_filter"
+							= text_with_icon 'Text Filter', 'search'
+						input.form-control type="search" ng-model="search.text" placeholder="" autofocus="true"
+				.col-sm-4
+					h3 Eh?
+					p.help-block The chapter reader is for general verse lookup and reading, as well as providing permanent links that you may use in your documents. 
+
+	#results ng-show="verses.length > 0"
+		table.table.table-condensed.table-striped
+			thead
+				tr
+					th.col-sm-1
+						a ng-click="reverse = !reverse; predicate = 'ordinal'; " Verse
+					th.col-sm-8
+						a ng-click="reverse = !reverse; predicate = 'text'; " Text
+					th.col-sm-3 Links &amp; API
+			tbody
+				tr ng-repeat="v in verses | filter:search.text | orderBy:predicate:reverse"
+					td ng-bind="v.ordinal"
+					td ng-bind="v.text"
+					td
+						.btn-group
+							a.btn.btn-sm.btn-default href="{{versePermalink(v, 'html')}}"
+								= text_with_icon 'Web', 'link'
+							a.btn.btn-sm.btn-default href="mailto:?{{verseMailTo(v)}}"
+								= text_with_icon 'Email', 'send'
+							a.btn.btn-sm href="{{versePermalink(v, 'json')}}"
+								small JSON
+							/ |  
+							a.btn.btn-sm href="{{versePermalink(v, 'xml')}}"
+								small XML
+

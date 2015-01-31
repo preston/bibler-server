@@ -1,0 +1,35 @@
+.container-fluid#reader ng-controller="SearchController"
+	br
+	.well
+		.row
+			.col-sm-4
+				form.form-horizontal role="form"
+					.form-group
+						label for="bible_select"
+							= text_with_icon 'Bible', 'book'
+						select#bible_select.form-control ng-model="selectedBible" ng-options="bible.slug as bible.name for bible in bibles" ng-change="search()"
+					.form-group
+						label for="bible_search_text"
+							= text_with_icon 'Text', 'search'
+						input.form-control type="search" ng-model="search.text" placeholder="text" autofocus="true" ng-change="search()"
+			.col-sm-8
+				h3 What does this do?
+				p.help-block The tool allows you to search the entire bible, based on the translation of your choosing. Results are limited to 100 per query.
+
+	div ng-show="verses.length > 0"
+
+		table.table.table-condensed.table-striped
+			thead
+				tr
+					th.col-sm-1
+						a ng-click="reverse = !reverse; predicate = 'chapter'; " Chapter
+					th.col-sm-1
+						a ng-click="reverse = !reverse; predicate = 'ordinal'; " Verse
+					th.col-sm-10
+						a ng-click="reverse = !reverse; predicate = 'text'; " Text
+			tbody
+				tr ng-repeat="v in verses | orderBy:predicate:reverse"
+					td ng-bind="v.chapter"
+					td ng-bind="v.ordinal"
+					td ng-bind="v.text"
+

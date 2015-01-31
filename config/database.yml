@@ -1,0 +1,13 @@
+default: &default
+  adapter: postgresql
+  username: postgres
+  password: 
+  hostname: 127.0.0.1
+
+development:
+  <<: *default
+  database: bibler_development
+
+test:
+  <<: *default
+  database: bibler_test
