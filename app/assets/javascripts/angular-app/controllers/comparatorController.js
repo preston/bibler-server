@@ -31,14 +31,15 @@ angular.module('BiblerApp').controller('ComparatorController', ['$scope', '$loca
 	$scope.selectBibleLeft = function() { $scope.updateChapters(); }
 	$scope.selectBibleRight = function() {
 		$scope.selectChapter();
-		// console.log("Selected right bible for comparison.");
-		// var bible = $scope.selectedBibleRight;
-		// var book = $scope.selectedBook;
-		// var chapter = $scope.selectedChapter;
-		// Restangular.all(bible + '/' + book + '/' + chapter).getList().then(function(verses) {
-		// 	$scope.versesRight = verses;
-		// });
 	}
+
+	$scope.bibleForSlug = function(slug) {
+		for(var i = 0; i < $scope.bibles.length; i++) {
+			if($scope.bibles[i].slug == slug) {
+				return $scope.bibles[i];
+			}
+		}
+	};
 
 	$scope.updateChapters = function() {
 		var bible = $scope.selectedBibleLeft;
