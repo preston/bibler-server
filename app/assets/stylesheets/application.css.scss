@@ -33,6 +33,11 @@ footer p > span {
 	padding: 20px;
 }
 
+.jumbotron {
+  box-shadow: 0 20px 20px rgba(0,0,0,.8);
+  background-color: none;
+  background: image-url('textures/xv.png') repeat;
+}
 
 body {
   background-color: none;
