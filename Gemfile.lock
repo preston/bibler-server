@@ -41,7 +41,7 @@ GEM
       sprockets
       tilt
     arel (6.0.0)
-    autoprefixer-rails (5.1.0)
+    autoprefixer-rails (5.1.1)
       execjs
       json
     binding_of_caller (0.7.2)
@@ -144,7 +144,7 @@ GEM
     rake (10.4.2)
     rdoc (4.2.0)
     ref (1.0.5)
-    sass (3.4.10)
+    sass (3.4.11)
     sass-rails (5.0.1)
       railties (>= 4.0.0, < 5.0)
       sass (~> 3.1)
