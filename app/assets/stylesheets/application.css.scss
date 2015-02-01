@@ -26,8 +26,22 @@ textarea:invalid,
 input:invalid {
 	box-shadow: 0 10px 10px rgba(220,13,23, .5);
 }
-header.navbar {
-	margin-bottom: 0px;
+header {
+	text-shadow: 0 4px 4px rgba(0,0,0,.2);
+	a {
+		-webkit-transition:	all .2s ease-out;
+		-moz-transition:	all .2s ease-out;
+		-o-transition:		all .2s ease-out;
+		transition:			all .2s ease-out;
+	}
+	a:hover {
+		text-decoration: none;
+		text-shadow: -4px 4px 4px rgba(0,0,0,.4);
+		-webkit-transition:	all .2s ease-out;
+		-moz-transition:	all .2s ease-out;
+		-o-transition:		all .2s ease-out;
+		transition:			all .2s ease-out;
+	}
 }
 footer p > span {
 	padding: 20px;
@@ -45,6 +59,12 @@ body {
 }
 
 #tabs {
+	.nav-tabs li a:hover {
+		background-color: rgba(0,0,0,.08);
+		border-top:		1px solid rgba(0,0,0,.1);	
+		border-left:	1px solid rgba(0,0,0,.1);	
+		border-right:	1px solid rgba(0,0,0,.1);	
+	}
 	.nav-tabs li.active a {
 		background-color: none;
 		background: image-url('textures/crossword.png') repeat;		
