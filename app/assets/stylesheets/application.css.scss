@@ -44,14 +44,40 @@ body {
   background: image-url('textures/tileable_wood_texture.png') repeat;
 }
 
-#tabs .tab-pane {
-  background-color: none;
-  background: image-url('textures/crossword.png') repeat;
-  box-shadow: 0 20px 20px rgba(0,0,0,.8);
+#tabs {
+	.nav-tabs li.active a {
+		background-color: none;
+		background: image-url('textures/crossword.png') repeat;		
+	}
+	.tab-pane {
+		background-color: none;
+		background: image-url('textures/crossword.png') repeat;
+		box-shadow: 0 20px 20px rgba(0,0,0,.8);
+		border-bottom-left-radius:	5px;
+		border-bottom-right-radius:	5px;
+	}
+	.tab-content {
+		border-left:	1px solid rgb(221, 221, 221);
+		border-right:	1px solid rgb(221, 221, 221);
+		border-bottom:	1px solid rgb(221, 221, 221);
+	}
 }
+
+
 
 .highlight {
 	background: rgba(230,230,0,.5);
+}
+
+// @media(max-width:767px){}
+// @media(min-width:768px){}
+// @media(min-width:992px){}
+// @media(min-width:1200px){}
+
+@media(max-width:768px) {
+	.tagline {
+		display: none;
+	}
 }
 
 table tbody {

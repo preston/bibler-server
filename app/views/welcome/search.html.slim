@@ -11,13 +11,16 @@
 					.form-group
 						label for="bible_search_text"
 							= text_with_icon 'Full Text Search', 'search'
-						input.form-control type="search" ng-model="search.text" autofocus="true"
-						/ p.help-block Use spaces to seperate multiple words.
-					.form-group
-						button.btn.btn-primary type="submit" = text_with_icon 'Search', 'search'
-						span ng-show="verses.length > 0"
-							i  Results: 
-							span.badge ng-bind="verses.length"
+						.input-group
+							input.form-control type="search" ng-model="search.text" autofocus="true"
+							span class="input-group-btn"
+								button.btn.btn-primary type="submit" ng-disabled="!validSearch()"
+									= text_with_icon 'Search', 'search'
+						span.text-muted Queries must be at least 3 characters.
+						span.text-right ng-show="validSearch() && verses.length > 0"
+							|  
+							span.badge ng-bind="verses.length + ' results'"
+							|  
 							i.text-danger ng-show="verses.length >= 100"  (limited)
 
 			.col-sm-6
@@ -33,6 +36,7 @@
 						a ng-click="reverse = !reverse; predicate = 'book.name'; " Book
 					th.col-sm-1
 						a ng-click="reverse = !reverse; predicate = 'chapter'; " Chapter
+					th
 					th.col-sm-1
 						a ng-click="reverse = !reverse; predicate = 'ordinal'; " Verse
 					th.col-sm-10
@@ -40,7 +44,9 @@
 			tbody
 				tr ng-repeat="v in verses | orderBy:predicate:reverse "
 					td ng-bind="v.book.name"
-					td ng-bind="v.chapter"
+					td.text-right ng-bind="v.chapter"
+					td
+						| :
 					td ng-bind="v.ordinal"
 					td ng-bind-html="v.text | highlight:search.text"
 

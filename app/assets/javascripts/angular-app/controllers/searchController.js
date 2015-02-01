@@ -9,7 +9,7 @@ angular.module('BiblerApp').controller('SearchController', ['$scope', '$location
 	$scope.search = function() {
 		var bible = $scope.selectedBible;
 		var text = $scope.search.text;
-		if(bible != null && text.length >= 3) {
+		if($scope.validSearch()) {
 			Restangular.all(bible + '/search').post({'text' : $scope.search.text}).then(function(verses) {
 				$scope.verses = verses;
 			});
@@ -17,6 +17,10 @@ angular.module('BiblerApp').controller('SearchController', ['$scope', '$location
 		} else {
 			$scope.verses = [];
 		}
+	}
+
+	$scope.validSearch = function() {
+		return $scope.selectedBible != null && $scope.search.text != null && $scope.search.text.length >= 3
 	}
 
 	console.log("SearchController has been initialized.");

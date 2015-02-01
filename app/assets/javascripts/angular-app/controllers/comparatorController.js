@@ -34,6 +34,9 @@ angular.module('BiblerApp').controller('ComparatorController', ['$scope', '$loca
 	}
 
 	$scope.bibleForSlug = function(slug) {
+		if($scope.bibles == null) {
+			return null;
+		}
 		for(var i = 0; i < $scope.bibles.length; i++) {
 			if($scope.bibles[i].slug == slug) {
 				return $scope.bibles[i];
