@@ -22,8 +22,6 @@ set :repo_url, 'git@github.com:preston/bibler.git'
 # Default value for :pty is false
 # set :pty, true
 
-set :passenger_restart_with_sudo, true
-
 
 # Default value for :linked_files is []
 # set :linked_files, fetch(:linked_files, []).push('config/database.yml')
