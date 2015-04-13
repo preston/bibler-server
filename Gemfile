@@ -34,7 +34,7 @@ group :development do
   gem 'capistrano-rails-console'
   gem 'capistrano-bundler'
   gem 'capistrano-rails'
-  gem 'capistrano-passenger'
+  # gem 'capistrano-passenger'
   gem 'sitemap_generator'
 end
 
