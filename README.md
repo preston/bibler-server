@@ -26,6 +26,10 @@ Bibler is a Rails app for the Ruby 2.2+ compatible runtimes, built with AngularJ
 Translations such as the New American Standard Bible require explicit licensing. We do not provide these data files, though a template CSV is provided in the *lib/tasks/* directory. If you have permission and the licensed *bibler_nasb.csv* data file in that directory, run the following after initial seeding:
 
 	rake bibler:nasb
+	
+# Deployment
+
+Bibler is a fairly ordinary Rails application. Deployment using Phusion Passenger on Apache HTTPD (or nginx) on Linux is highly recommended. Capistrano is recommended for one-line production upgrades, though not required.
 
 # Attribution
 

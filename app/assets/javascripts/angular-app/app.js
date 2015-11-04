@@ -3,7 +3,6 @@ app = angular.module('BiblerApp', [
 	'restangular',
 	'ngRoute',
 	'relativeDate',
-	'ng-form-data',
 	'humanizeFilters',
 	'angular-growl',
 	// 'ui.utils',

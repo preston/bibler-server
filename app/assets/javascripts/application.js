@@ -9,9 +9,6 @@
 //  relativeDate display filter
 //= require angular-relative-date
 // 
-//	ng-model binding for file uploads
-//= require ng-form-data
-// 
 // GUI notifications and animations
 //= require angular-growl-v2 
 //= require angular-animate
