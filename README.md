@@ -7,9 +7,11 @@ A RESTful web service for common English translations of the Christian bible.
 Bibler is a Rails app for the Ruby 2.2+ compatible runtimes, built with AngularJS and Twitter Bootstrap.
 
 	bundle install # Install ruby dependencies.
-	cp config/secrets.yml.sample config/secrets.yml # Change your secret, please!
+	cp config/sitemap.rb.sample config/sitemap.rb # Set your production URL
 	cp config/database.yml.sample config/database.yml # Edit, please! (Postgres only)
-	
+	git submodule init
+	git submodule update
+
     rails db:migrate # Apply schema migrations.
     rails db:seed # Load bible data. Will take a while due to text indexing.
     rails s # Run the server.

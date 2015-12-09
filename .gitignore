@@ -17,6 +17,6 @@
 /tmp
 .DS_Store
 config/database.yml
-config/secrets.yml
+config/sitemap.rb
 
 lib/tasks/bibler_nasb.csv
