@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 ruby '2.2.3'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.4'
+gem 'rails', '4.2.5'
 gem 'sass-rails'  #, '~> 5.0'
 gem 'uglifier'  #, '>= 1.3.0'
 
@@ -28,6 +28,9 @@ gem 'friendly_id'
 # Required at deploy time.
 gem 'therubyracer'
 
+# Better web server
+gem 'puma'
+
 # Use Capistrano for deployment
 group :development do
 	gem 'capistrano-rvm'
@@ -36,6 +39,7 @@ group :development do
 	gem 'capistrano-rails'
 	# gem 'capistrano-passenger'
 	gem 'sitemap_generator'
+	gem 'web-console' #, '~> 2.0'
 end
 
 group :development, :test do
@@ -43,9 +47,9 @@ group :development, :test do
 	gem 'byebug'
 
 	# Access an IRB console on exception pages or by using <%= console %> in views
-	gem 'web-console' #, '~> 2.0'
 	gem 'spring'
-	# gem 'sqlite3'
+	gem 'guard'
+	gem 'guard-minitest'
 	gem 'railroady'
 end
 

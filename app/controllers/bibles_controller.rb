@@ -1,7 +1,7 @@
 class BiblesController < ApplicationController
 
   def index
-    render json: Bible.all
+    @bibles = Bible.all
   end
 
   def show

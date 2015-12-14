@@ -1,7 +1,7 @@
 class TestamentsController < ApplicationController
 
   def index
-    render json: Testament.all
+  	@testaments = Testament.all
   end
 
   def show

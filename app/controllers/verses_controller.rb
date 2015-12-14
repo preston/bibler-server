@@ -1,12 +1,8 @@
 class VersesController < ApplicationController
 
-  before_filter :set_context, except: [:index, :search]
+  before_filter :set_context, except: [:search]
 
   SEARCH_LIMIT = 100
-
-  # def index
-  #   @verses = Verse.all
-  # end
 
   def show
     @verse = Verse.where(bible: @bible, book: @book, chapter: params[:chapter], ordinal: params[:ordinal]).first
