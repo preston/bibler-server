@@ -73,3 +73,18 @@
 				h6 parameters
 				pre
 					| {text: 'jesus christ'} // required
+
+	.row
+		.col-sm-3
+			h2 Widgets!
+			p
+				| Integrating Bibler into existing web applications is trivial. Using the API and custom JavaScript is always an option, though the cool kids will use our provided AngularJS directive (or equivalent port) to bind the Bibler API *directly* to your own styled page. The sample directive is provided in the repository, 
+				= link_to 'here', 'https://github.com/preston/bibler/tree/master/app/assets/javascripts/angular-app/directives/biblerDirective.js'
+				| .
+		.col-sm-9
+			h4 The AngularJS Directive
+			pre
+				p &lt;bibler-verse bible="american-standard-asv1901" book="genesis" chapter="1" verse="2" /&gt;
+			h4 Rendered Output (BYOCSS)
+			.well
+				bibler-verse bible="american-standard-asv1901" book="genesis" chapter="1" verse="2"

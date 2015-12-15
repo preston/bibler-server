@@ -28,8 +28,6 @@ angular.module('BiblerApp').controller('ReaderController', ['$scope', '$location
 		console.log("Loaded " + testaments.length + " testaments.");
 	});
 
-
-
 	$scope.selectBible = function() {
 		$scope.updateChapters();
 	};
