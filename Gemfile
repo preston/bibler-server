@@ -37,7 +37,7 @@ group :development do
 	gem 'capistrano-rails-console'
 	gem 'capistrano-bundler'
 	gem 'capistrano-rails'
-	# gem 'capistrano-passenger'
+	gem 'capistrano-passenger' # Automatically restarts on deploy
 	gem 'sitemap_generator'
 	gem 'web-console' #, '~> 2.0'
 end
