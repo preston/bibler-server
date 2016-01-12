@@ -1,10 +1,13 @@
 source 'https://rubygems.org'
-ruby '2.2.3'
+ruby '2.3.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.5'
 gem 'sass-rails'  #, '~> 5.0'
 gem 'uglifier'  #, '>= 1.3.0'
+
+# FIXME Should be able to eventually remove this:
+gem 'sprockets', '~> 2.12.4' # http://stackoverflow.com/questions/34391858/error-while-trying-angularjs-with-railsundefined-method-register-engine-for-n
 
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
