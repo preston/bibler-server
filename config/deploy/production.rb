@@ -1,7 +1,7 @@
 set :stage, :production
 set :rvm_ruby_version, '2.3.0'
 
-set :deploy_to, "/var/www/bibler.prestonlee.com"
+set :deploy_to, "/var/www/bibler-server.prestonlee.com"
 
 # Simple Role Syntax
 # ==================
@@ -9,9 +9,9 @@ set :deploy_to, "/var/www/bibler.prestonlee.com"
 # is considered to be the first unless any hosts have the primary
 # property set.  Don't declare `role :all`, it's a meta role.
 
-role :app, %w{www-data@bibler.prestonlee.com}
-role :web, %w{www-data@bibler.prestonlee.com}
-role :db,  %w{www-data@bibler.prestonlee.com}
+role :app, %w{www-data@bibler-server.prestonlee.com}
+role :web, %w{www-data@bibler-server.prestonlee.com}
+role :db,  %w{www-data@bibler-server.prestonlee.com}
 
 
 # Extended Server Syntax
@@ -20,7 +20,7 @@ role :db,  %w{www-data@bibler.prestonlee.com}
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server 'bibler.prestonlee.com', user: 'www-data', roles: %w{web app}, my_property: :my_value
+server 'bibler-server.prestonlee.com', user: 'www-data', roles: %w{web app}, my_property: :my_value
 
 
 # Custom SSH Options
