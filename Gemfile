@@ -3,28 +3,16 @@ ruby '2.3.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.6'
-gem 'sass-rails'  #, '~> 5.0'
-gem 'uglifier'  #, '>= 1.3.0'
+# gem 'sass-rails'  #, '~> 5.0'
+# gem 'uglifier'  #, '>= 1.3.0'
 
 # FIXME Should be able to eventually remove this:
 gem 'sprockets', '~> 2.12.4' # http://stackoverflow.com/questions/34391858/error-while-trying-angularjs-with-railsundefined-method-register-engine-for-n
 
-# Use jquery as the JavaScript library
-gem 'jquery-rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.4.1'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.1', group: :doc
-
-# AngularJS
-# http://www.intridea.com/blog/2014/9/25/how-to-set-up-angular-with-rails
-gem 'angular-rails-templates'
-gem 'bower-rails'
-
-gem 'bootstrap-sass'
-
-# Better templating.
-gem 'slim-rails'
 
 gem 'friendly_id'
 

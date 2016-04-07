@@ -9,7 +9,6 @@ class VersesController < ApplicationController
     respond_to do |format|
       format.json { render json: @verse, include: [:book, :bible] }
       format.xml { render xml: @verse, include: [:book, :bible] }
-      format.html { render }
     end
   end
 
@@ -35,7 +34,7 @@ class VersesController < ApplicationController
 
   def set_context
     @bible = Bible.find(params[:bible])
-    @book = Book.find(params[:book]) 
+    @book = Book.find(params[:book])
   end
 
 end
