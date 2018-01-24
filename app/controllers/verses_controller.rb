@@ -1,6 +1,6 @@
 class VersesController < ApplicationController
 
-  before_filter :set_context, except: [:search]
+  before_action :set_context, except: [:search]
 
   SEARCH_LIMIT = 100
 
