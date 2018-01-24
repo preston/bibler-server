@@ -1,5 +1,5 @@
 # Set the host name for URL creation
-SitemapGenerator::Sitemap.default_host = "http://bibler.prestonlee.com"
+SitemapGenerator::Sitemap.default_host = "https://bibler.prestonlee.com"
 
 SitemapGenerator::Sitemap.create do
   # Put links creation logic here.

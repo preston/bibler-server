@@ -1,0 +1,23 @@
+default: &default
+  adapter: postgresql
+  encoding: utf8
+  pool: <%= (ENV['BIBLER_SERVER_THREADS'].to_i + 2) || 8 %>
+
+development:
+  <<: *default
+  database: bibler_development
+  host: localhost
+  username: bibler
+  password: password
+
+test:
+  <<: *default
+  url:  <%= ENV["BIBLER_DATABASE_URL_TEST"] %>
+
+production:
+  <<: *default
+  url:  <%= ENV["BIBLER_DATABASE_URL"] %>
+
+# benchmark:
+#   <<: *default
+#   url:  <%= ENV["BIBLER_DATABASE_URL"] %>

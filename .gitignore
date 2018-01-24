@@ -16,8 +16,7 @@
 !/log/.keep
 /tmp
 .DS_Store
-config/database.yml
-config/sitemap.rb
+#config/sitemap.rb
 
 # Cannot be checked in due to licensing restrictions.
 lib/tasks/bibler_nasb.csv

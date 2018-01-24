@@ -1,12 +1,13 @@
-workers Integer(ENV['WEB_CONCURRENCY'] || 2)
-threads_count = Integer(ENV['MAX_THREADS'] || 5)
+workers Integer(ENV['BIBLER_SERVER_PROCESSES'] || 4)
+threads_count = Integer(ENV['BIBLER_SERVER_THREADS'] || 4)
 threads threads_count, threads_count
 
 preload_app!
 
 rackup      DefaultRackup
-port        ENV['PORT']     # || 3000
-environment ENV['RACK_ENV'] || 'development'
+# port        ENV['PORT']     # || 3000
+port 3000
+# environment ENV['RACK_ENV'] || 'development'
 
 # If you'd like to test with TLS/SSL instead of raw HTTP, you may use:
 # bind "ssl://127.0.0.1:#{ENV['PORT']}?key=./doc/ssl/development.key&cert=./doc/ssl/development.crt"
