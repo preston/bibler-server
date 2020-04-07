@@ -1,5 +1,5 @@
-FROM ruby:2.5.0
-MAINTAINER Preston Lee
+FROM ruby:2.7.0
+LABEL MAINTAINER="Preston Lee <preston.lee@prestonlee.com"
 
 # Default shell as bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh

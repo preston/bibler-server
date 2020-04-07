@@ -1,6 +1,6 @@
 class Verse < ActiveRecord::Base
 
-	include PgSearch
+	include PgSearch::Model
 	# multisearchable :against => [:text]
 	pg_search_scope :search_by_text, :against => :text
 

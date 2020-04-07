@@ -1,10 +1,10 @@
 # Bibler
 
-A RESTful web service for common English translations of the Christian bible.
+A RESTful web service API for common English translations of the Christian bible. Built with Rails 6.
 
 # Developer Quick Start
 
-Bibler is a Rails app for the Ruby 2.2+ compatible runtimes, built with AngularJS and Twitter Bootstrap.
+Bibler is a full API and search service for the Ruby 2.7+ compatible runtimes.
 
 	bundle install # Install ruby dependencies.
 	cp config/sitemap.rb.sample config/sitemap.rb # Set your production URL
@@ -31,7 +31,7 @@ Translations such as the New American Standard Bible require explicit licensing.
 
 # Deployment
 
-Bibler is a fairly ordinary Rails application, and is pre-built and distributed via Docker images.
+Bibler is a fairly ordinary Rails application, and is pre-built and distributed via [Docker images](https://hu).
 
 # Attribution
 

@@ -18,7 +18,7 @@ class VersesController < ApplicationController
   end
 
   def chapters
-    @chapters = Verse.where(bible: @bible, book: @book).uniq.pluck(:chapter).sort
+    @chapters = Verse.where(bible: @bible, book: @book).pluck(:chapter).uniq.sort
     # @verses = Verse.where(bible: bible, book: book, chapter: params[:chapter])
     render json: @chapters
   end

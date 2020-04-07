@@ -1,3 +1,6 @@
 .git
 .gitignore
+.gitmodules
+.dockerignore
 log
+public/bible_databases
