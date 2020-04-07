@@ -17,12 +17,6 @@ Bibler is a full API and search service for the Ruby 2.7+ compatible runtimes.
     rails s # Run the server.
     open localhost:3000 # Use it!
 
-# Updating The Static Sitemap
-
-	# Edit your config/sitemap.rb to point to your own URL.
-    # Only do this with a fully-loaded database! It'll take a while.
-	rake sitemap:refresh
-
 # Loading License Bibles
 
 Translations such as the New American Standard Bible require explicit licensing. We do not provide these data files, though a template CSV is provided in the *lib/tasks/* directory. If you have permission and the licensed *bibler_nasb.csv* data file in that directory, run the following after initial seeding:
