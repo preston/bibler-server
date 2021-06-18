@@ -12,7 +12,11 @@ development:
 
 test:
   <<: *default
-  url:  <%= ENV["BIBLER_DATABASE_URL_TEST"] %>
+  database: bibler_test
+  host: localhost
+  username: bibler
+  password: password
+  # url:  <%= ENV["BIBLER_DATABASE_URL_TEST"] %>
 
 production:
   <<: *default

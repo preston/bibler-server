@@ -14,7 +14,7 @@ class BooksControllerTest < ActionController::TestCase
 
 	test "should show book" do
 		# get :get, book: @book.slug, format: :json
-		get :show, id: @book, format: :json
+		get :show, params: {id: @book, format: :json}
 		assert_not_nil assigns(:book)
 		assert_response :success
 	end

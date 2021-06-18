@@ -12,7 +12,7 @@ class TestamentsControllerTest < ActionController::TestCase
   end
 
   test "should show testament" do
-    get :show, id: @testament, format: :json
+  get :show, params: { id: @testament, format: :json }
     assert_response :success
   end
 

@@ -13,7 +13,7 @@ class BiblesControllerTest < ActionController::TestCase
   end
 
   test "should show bible" do
-    get :show, id: @bible.slug, format: :json
+    get :show, params: {id: @bible.slug, format: :json}
     assert_not_nil assigns(:bible)
     assert_response :success
   end
