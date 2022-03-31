@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 1) do
-
+ActiveRecord::Schema[7.0].define(version: 1) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,8 +18,8 @@ ActiveRecord::Schema.define(version: 1) do
     t.string "name", null: false
     t.string "abbreviation", null: false
     t.string "slug", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["abbreviation"], name: "index_bibles_on_abbreviation", unique: true
     t.index ["name"], name: "index_bibles_on_name", unique: true
     t.index ["slug"], name: "index_bibles_on_slug", unique: true
@@ -31,8 +30,8 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer "ordinal", null: false
     t.string "name", null: false
     t.string "slug", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["name"], name: "index_books_on_name", unique: true
     t.index ["ordinal"], name: "index_books_on_ordinal"
     t.index ["slug"], name: "index_books_on_slug", unique: true
@@ -41,8 +40,8 @@ ActiveRecord::Schema.define(version: 1) do
   create_table "testaments", id: :serial, force: :cascade do |t|
     t.string "name", null: false
     t.string "slug", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index ["name"], name: "index_testaments_on_name", unique: true
   end
 
@@ -53,8 +52,8 @@ ActiveRecord::Schema.define(version: 1) do
     t.integer "ordinal", null: false
     t.text "text", null: false
     t.string "slug", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "updated_at", precision: nil, null: false
     t.index "to_tsvector('simple'::regconfig, COALESCE(text, ''::text))", name: "verses_gin_text", using: :gin
     t.index ["slug"], name: "index_verses_on_slug"
     t.index ["text"], name: "index_verses_on_text"
