@@ -2,5 +2,9 @@
 .gitignore
 .gitmodules
 .dockerignore
-log
+
 public/bible_databases
+
+Dockerfile
+log
+README.md
