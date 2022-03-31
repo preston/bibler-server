@@ -8,7 +8,7 @@ class VersesController < ApplicationController
     @verse = Verse.where(bible: @bible, book: @book, chapter: params[:chapter], ordinal: params[:ordinal]).first
     respond_to do |format|
       format.json { render json: @verse, include: [:book, :bible] }
-      format.xml { render xml: @verse, include: [:book, :bible] }
+      # format.xml { render xml: @verse, include: [:book, :bible] }
     end
   end
 
@@ -25,6 +25,7 @@ class VersesController < ApplicationController
 
   def search
     t = params[:text]
+    # puts "Searching for '#{t}'.."
     bible = Bible.find(params[:bible])
     @verses = Verse.limit(SEARCH_LIMIT).where(bible: bible).search_by_text(t).includes(:book)
     render json: @verses, include: :book
