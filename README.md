@@ -27,6 +27,22 @@ Translations such as the New American Standard Bible require explicit licensing.
 
 Bibler is a fairly ordinary Rails application, and is pre-built and distributed via [Docker images](https://hu).
 
+# Building
+
+Custom Bibler Server distributions can be build with Docker or compatible build systems. To build,
+
+```docker build --platform linux/amd64 -t p3000/bibler-server:latest .```
+
+To run it:
+```
+docker run -it --rm -p 8080:3000 --name bibler-server \
+-e "BIBLER_DATABASE_URL=postgresql://bibler:password@192.168.1.191:5432/bibler_development" \
+-e "BIBLER_SECRET_KEY_BASE=super_secret" \
+-e "BIBLER_MIN_THREADS=4" \
+--platform linux/amd64 \
+p3000/bibler-server:latest
+```
+
 # Attribution
 
 Author: Preston Lee

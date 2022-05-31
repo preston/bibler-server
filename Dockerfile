@@ -1,8 +1,13 @@
-FROM ruby:3.1.1
+FROM ruby:3.1.2-slim-bullseye
 LABEL MAINTAINER="Preston Lee <preston.lee@prestonlee.com"
 
 # Default shell as bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+# Install compilation tools, PostgreSQL client, and PostgreSQL client header files (libpq-dev)
+RUN apt update
+RUN apt install -y build-essential postgresql-client libpq-dev
+
 
 
 # Configure the main working directory. This is the base
