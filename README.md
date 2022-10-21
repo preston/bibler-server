@@ -31,7 +31,7 @@ Bibler is a fairly ordinary Rails application, and is pre-built and distributed 
 
 Custom Bibler Server distributions can be build with Docker or compatible build systems. To build,
 
-```docker build --platform linux/amd64 -t p3000/bibler-server:latest .```
+```docker buildx build --platform linux/arm64,linux/amd64 -t p3000/bibler-server:latest . --push```
 
 To run it:
 ```
