@@ -1,6 +1,6 @@
 # Bibler
 
-A RESTful web service API for common English translations of the Christian bible. Built with Rails 6.
+A RESTful web service API for common English translations of the Christian bible. Built with Rails 7.
 
 # Developer Quick Start
 
