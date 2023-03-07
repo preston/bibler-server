@@ -3,8 +3,6 @@
 .gitmodules
 .dockerignore
 
-public/bible_databases
-
 Dockerfile
 log
 README.md

@@ -1,3 +1,0 @@
-[submodule "public/bible_databases"]
-	path = public/bible_databases
-	url = git@github.com:scrollmapper/bible_databases.git
