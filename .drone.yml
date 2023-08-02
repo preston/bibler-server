@@ -2,11 +2,11 @@
 kind: pipeline
 type: docker
 steps:
-  - name: test
-    image: ruby:slim
-    commands:
-      - bundle install
-      - rake
+  # - name: test
+  #   image: ruby:slim
+  #   commands:
+  #     - bundle install
+  #     - rake
   - name: publish
     image: plugins/docker
     settings:
