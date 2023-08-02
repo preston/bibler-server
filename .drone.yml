@@ -1,0 +1,19 @@
+---
+kind: pipeline
+type: docker
+steps:
+  - name: test
+    image: ruby:slim
+    commands:
+      - bundle install
+      - rake
+  - name: publish
+    image: plugins/docker
+    settings:
+      repo:
+        from_secret:  docker_repository
+      tags: [latest]
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
