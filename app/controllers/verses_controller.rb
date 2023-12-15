@@ -1,5 +1,7 @@
-class VersesController < ApplicationController
+# frozen_string_literal: true
 
+# Author: Preston Lee
+class VersesController < ApplicationController
   before_action :set_context, except: [:search]
 
   SEARCH_LIMIT = 100
@@ -7,7 +9,7 @@ class VersesController < ApplicationController
   def show
     @verse = Verse.where(bible: @bible, book: @book, chapter: params[:chapter], ordinal: params[:ordinal]).first
     respond_to do |format|
-      format.json { render json: @verse, include: [:book, :bible] }
+      format.json { render json: @verse, include: %i[book bible] }
       # format.xml { render xml: @verse, include: [:book, :bible] }
     end
   end
@@ -27,7 +29,7 @@ class VersesController < ApplicationController
     t = params[:text]
     # puts "Searching for '#{t}'.."
     bible = Bible.find(params[:bible])
-    @verses = Verse.limit(SEARCH_LIMIT).where(bible: bible).search_by_text(t).includes(:book)
+    @verses = Verse.limit(SEARCH_LIMIT).where(bible:).search_by_text(t).includes(:book)
     render json: @verses, include: :book
   end
 
@@ -37,5 +39,4 @@ class VersesController < ApplicationController
     @bible = Bible.find(params[:bible])
     @book = Book.find(params[:book])
   end
-
 end

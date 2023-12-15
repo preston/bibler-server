@@ -1,5 +1,6 @@
-class InitialSchema < ActiveRecord::Migration[5.0]
+# frozen_string_literal: true
 
+class InitialSchema < ActiveRecord::Migration[5.0]
   def change
     create_table :bibles do |t|
       t.string :name, null: false
@@ -19,7 +20,6 @@ class InitialSchema < ActiveRecord::Migration[5.0]
       t.timestamps null: false
     end
     add_index :testaments, :name, unique: true
-
 
     create_table :books do |t|
       t.integer :testament_id, null: false
@@ -46,13 +46,10 @@ class InitialSchema < ActiveRecord::Migration[5.0]
     end
     add_foreign_key :verses, :bibles
     add_foreign_key :verses, :books
-    add_index :verses, :slug #, unique: true
-    add_index :verses, :text #, unique: true
+    add_index :verses, :slug # , unique: true
+    add_index :verses, :text # , unique: true
 
     # Full text index for Postgres.
     execute "CREATE INDEX verses_gin_text ON verses USING GIN(to_tsvector('simple', coalesce(text::TEXT, '')))"
-
   end
-
-
 end

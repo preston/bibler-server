@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 set :application, 'bibler'
 set :repo_url, 'git@github.com:preston/bibler.git'
 
-set :linked_files, %w{config/database.yml config/secrets.yml}
-set :linked_dirs, fetch(:linked_dirs, []).push('bin', 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
+set :linked_files, %w[config/database.yml config/secrets.yml]
+set :linked_dirs,
+    fetch(:linked_dirs, []).push('bin', 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
 
 # Default value for keep_releases is 5
 set :keep_releases, 3
 
 namespace :deploy do
-
   after :restart, :clear_cache do
     on roles(:web), in: :groups, limit: 3, wait: 10 do
       # Here we can do anything such as:
@@ -18,9 +20,7 @@ namespace :deploy do
     end
   end
 
-
   after :finishing, 'deploy:cleanup'
-
 end
 
 # Hack from: https://gist.github.com/corny/7459729
@@ -44,4 +44,3 @@ end
 #   end
 
 # end
-

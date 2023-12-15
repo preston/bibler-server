@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 # Set the host name for URL creation
-SitemapGenerator::Sitemap.default_host = "https://bibler.prestonlee.com"
+SitemapGenerator::Sitemap.default_host = 'https://bibler.prestonlee.com'
 
 SitemapGenerator::Sitemap.create do
   # Put links creation logic here.
@@ -30,9 +32,9 @@ SitemapGenerator::Sitemap.create do
         bible: b,
         book: v.book,
         chapter: v.chapter,
-        ordinal: v.ordinal),
+        ordinal: v.ordinal
+      ),
           changefreq: :weekly
     end
   end
-
 end
