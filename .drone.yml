@@ -9,7 +9,7 @@ steps:
   - name: publish
     image: plugins/docker
     settings:
-      repo: p3000/bible-server
+      repo: p3000/bibler-server
       tags: [latest-linux-amd64]
       # auto_tag: true
       username:
@@ -27,7 +27,7 @@ steps:
   - name: publish
     image: plugins/docker
     settings:
-      repo: p3000/bible-server
+      repo: p3000/bibler-server
       tags: [latest-linux-arm64]
       # auto_tag: true
       username:
@@ -49,7 +49,7 @@ steps:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      target: p3000/bible-server:latest
+      target: p3000/bibler-server:latest
       template: p3000/bibler-server:latest-OS-ARCH
       platforms:
         - linux/amd64
