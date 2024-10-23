@@ -4,7 +4,7 @@ A RESTful web service API for common English translations of the Christian bible
 
 # Developer Quick Start
 
-Bibler is a full API and search service for the Ruby 2.7+ compatible runtimes.
+Bibler is a full API and search service for the Ruby 3.3+ compatible runtimes.
 
 	bundle install # Install ruby dependencies.
 	cp config/sitemap.rb.sample config/sitemap.rb # Set your production URL
@@ -36,9 +36,9 @@ Custom Bibler Server distributions can be build with Docker or compatible build 
 To run it:
 ```
 docker run -it --rm -p 8080:3000 --name bibler-server \
--e "BIBLER_DATABASE_URL=postgresql://bibler:password@192.168.1.191:5432/bibler_development" \
--e "BIBLER_SECRET_KEY_BASE=super_secret" \
--e "BIBLER_MIN_THREADS=4" \
+-e "BIBLER_SERVER_DATABASE_URL=postgresql://bibler:password@192.168.1.191:5432/bibler_development" \
+-e "BIBLER_SERVER_SECRET_KEY_BASE=super_secret" \
+-e "BIBLER_SERVER_MIN_THREADS=4" \
 --platform linux/amd64 \
 p3000/bibler-server:latest
 ```

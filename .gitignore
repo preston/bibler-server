@@ -20,3 +20,5 @@
 
 # Cannot be checked in due to licensing restrictions.
 lib/tasks/bibler_nasb.csv
+
+/config/master.key
