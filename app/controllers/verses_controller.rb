@@ -37,6 +37,6 @@ class VersesController < ApplicationController
 
   def set_context
     @bible = Bible.find(params[:bible])
-    @book = Book.find(params[:book])
+    @book = @bible.books.find(params[:book])
   end
 end

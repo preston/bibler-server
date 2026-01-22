@@ -3,6 +3,7 @@
 # Author: Preston Lee
 class Bible < ActiveRecord::Base
   has_many :verses, dependent: :destroy
+  has_many :books, dependent: :destroy
 
   extend FriendlyId
   friendly_id :slug_candidates, use: %i[slugged finders]
@@ -10,8 +11,9 @@ class Bible < ActiveRecord::Base
   validates_presence_of :name
   validates_presence_of :abbreviation
   validates_presence_of :slug
+  validates_presence_of :language
 
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, scope: :language
   validates_uniqueness_of :abbreviation
 
   def slug_candidates

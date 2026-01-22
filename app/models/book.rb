@@ -3,13 +3,14 @@
 # Author: Preston Lee
 class Book < ActiveRecord::Base
   has_many :verses, dependent: :destroy
+  belongs_to :bible
   belongs_to :testament
 
   extend FriendlyId
-  friendly_id :name, use: %i[slugged finders]
+  friendly_id :name, use: %i[slugged finders scoped], scope: :bible
 
   validates_presence_of :name
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, scope: :bible_id
 
   # def verse_count(bible)
   #   verses.where(bible:).count

@@ -37,3 +37,4 @@ alwaysApply: true
 - Prefer code reusable logic over duplication
 - Document non-obvious code decisions
 - Remove dead/commented code regularly
+- Documentation should be concise, non-duplicative, and oriented towards a technical audience
