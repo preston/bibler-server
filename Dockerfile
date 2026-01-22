@@ -1,4 +1,4 @@
-FROM ruby:3.4.1-slim
+FROM ruby:4.0.1-slim
 LABEL MAINTAINER="Preston Lee <preston.lee@prestonlee.com"
 
 # Default shell as bash
