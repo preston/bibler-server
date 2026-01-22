@@ -1,7 +1,10 @@
+.cursor
+.dockerignore
+.drone.yml
 .git
 .gitignore
 .gitmodules
-.dockerignore
+.rubocop.yml
 
 Dockerfile
 log

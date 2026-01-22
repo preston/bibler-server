@@ -25,7 +25,9 @@ Translations such as the New American Standard Bible require explicit licensing.
 
 # Deployment
 
-Bibler is a fairly ordinary Rails application, and is pre-built and distributed via [Docker images](https://hu).
+Bibler Server is a bible study API provided as a Rails application, and is pre-built and distributed via [Docker Hub](https://hub.docker.com/r/p3000/bibler-server).
+
+See Bibler UI for the web frontend.
 
 # Building
 
