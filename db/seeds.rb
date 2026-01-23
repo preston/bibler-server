@@ -1,18 +1,17 @@
 # frozen_string_literal: true
 
 require 'csv'
-require 'set'
 
 require 'bibler'
 
 include Bibler::Data # rubocop:disable Style/MixinUsage
 
 # Get path from environment variable or use default
-base_path = ENV['BIBLE_DATABASES_PATH'] || File.expand_path('../bible_databases', Rails.root)
+base_path = ENV['BIBLER_SERVER_BIBLE_DATABASES_PATH'] || File.expand_path('../bible_databases', Rails.root)
 
 unless Dir.exist?(base_path)
   puts "Error: bible_databases directory not found at #{base_path}"
-  puts "Please set BIBLE_DATABASES_PATH environment variable or ensure ../bible_databases exists"
+  puts 'Please set BIBLER_SERVER_BIBLE_DATABASES_PATH environment variable or ensure ../bible_databases exists'
   exit 1
 end
 
@@ -90,7 +89,7 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
   # Second pass: import verses
   # Check if this is an initial import (no verses exist for this bible)
   is_initial_import = Verse.where(bible:).count.zero?
-  
+
   if is_initial_import
     # Bulk insert for initial imports (much faster)
     verse_records = []
@@ -108,7 +107,7 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
       # Generate slug manually for bulk insert (friendly_id uses ordinal as base, scoped to bible/book/chapter)
       # Since it's scoped, the slug is just the ordinal as a string
       slug = verse_ordinal.to_s
-      
+
       verse_records << {
         bible_id: bible.id,
         book_id: book.id,
@@ -119,7 +118,7 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
         created_at: Time.current,
         updated_at: Time.current
       }
-      
+
       # Batch inserts for better performance
       if verse_records.length >= 1000
         Verse.insert_all(verse_records)
@@ -127,7 +126,7 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
         verse_records = []
       end
     end
-    
+
     # Insert remaining records
     if verse_records.any?
       Verse.insert_all(verse_records)
