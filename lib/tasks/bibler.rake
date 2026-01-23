@@ -71,10 +71,8 @@ namespace :bibler do
     Rails.logger = Logger.new(nil)
 
     begin
-      # Silence all ActiveRecord SQL notifications
-      ActiveSupport::Notifications.silence do
-        # Process each CSV file
-        Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
+      # Process each CSV file
+      Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
           filename = File.basename(csv_file, '.csv')
           next unless translations.key?(filename)
 
@@ -208,7 +206,6 @@ namespace :bibler do
 
           puts " #{count}"
         end
-      end
     ensure
       # Restore logging
       ActiveRecord::Base.logger = old_ar_logger
