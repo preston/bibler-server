@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+test1:
+  name: Test Bible 1
+  abbreviation: TEST1
+  language: en
+  license: Test License
+  slug: test-bible-1
+
+test2:
+  name: Test Bible 2
+  abbreviation: TEST2
+  language: en
+  license: Test License
+  slug: test-bible-2

@@ -45,6 +45,82 @@ docker run -it --rm -p 8080:3000 --name bibler-server \
 p3000/bibler-server:latest
 ```
 
+# MCP (Model Context Protocol) Support
+
+The Bibler server supports the Model Context Protocol, allowing AI agents to discover and use bible research tools.
+
+## Testing with MCP Inspector
+
+Use the official MCP Inspector tool to test and debug the MCP server:
+
+1. Start the Bibler server:
+   ```bash
+   rails s
+   ```
+
+2. In a separate terminal, run the MCP Inspector with increased timeout:
+   ```bash
+   MCP_SERVER_REQUEST_TIMEOUT=30000 npx @modelcontextprotocol/inspector
+   ```
+   
+   Or use the Inspector's direct connection mode:
+   ```bash
+   npx @modelcontextprotocol/inspector --url http://localhost:3000/mcp
+   ```
+
+3. The Inspector UI will open at `http://localhost:6274`
+
+4. If connecting manually in the UI:
+   - **Transport**: Streamable HTTP (or HTTP Stream)
+   - **URL**: `http://localhost:3000/mcp`
+   - **Connection Type**: Direct
+   - **No authentication required** - the server accepts requests without auth headers
+
+5. Use the Inspector to:
+   - View available tools in the Tools tab
+   - Test tool calls with different parameters
+   - Monitor server responses and notifications
+   - Debug protocol-level issues
+
+**Configuration Tips**:
+- **IMPORTANT**: The Inspector may have a shorter default timeout than expected
+- **Increase the timeout in the Inspector UI**: Click "Configuration" → "Request Timeout" → Set to at least 30000ms (30 seconds) or higher
+- For direct connections, ensure CORS is properly configured (already set in this server)
+- The Inspector will establish both a GET SSE connection (announcement channel) and POST requests (command channel)
+- No authentication is required - the server accepts requests without auth headers
+
+**If you experience "Request timed out" errors (-32001)**:
+1. **First, increase the timeout in the Inspector UI**: 
+   - Click the "Configuration" button in the sidebar
+   - Find "Request Timeout" and increase it to at least 30000ms (30 seconds)
+   - The default might be too short (10 seconds or less)
+2. Check the Rails server logs - you should see debug messages for each request
+3. Verify the server responds to both GET (SSE) and POST requests using curl:
+   ```bash
+   # Test POST
+   curl -X POST http://localhost:3000/mcp -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+   
+   # Test GET (SSE)
+   curl -N http://localhost:3000/mcp -H "Accept: text/event-stream"
+   ```
+4. Check browser console (F12) for any connection or CORS errors
+
+## Available MCP Tools
+
+- `search_verses`: Search for verses by text query
+- `get_verse`: Get a specific verse by reference
+- `get_chapter`: Get all verses in a chapter
+- `list_books`: List books in a bible
+- `list_bibles`: List available bible translations
+- `get_book_info`: Get information about a specific book
+- `list_languages`: List all distinct language codes and their human-readable names
+
+## MCP Endpoint
+
+The MCP endpoint is available at: `POST /mcp`
+
+For streaming responses: `GET /mcp` (SSE)
+
 # Attribution
 
 Author: Preston Lee

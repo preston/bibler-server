@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+genesis_test1:
+  name: Genesis
+  bible: test1
+  testament: old
+  ordinal: 1
+  slug: genesis
+
+genesis_test2:
+  name: Genesis
+  bible: test2
+  testament: old
+  ordinal: 1
+  slug: genesis

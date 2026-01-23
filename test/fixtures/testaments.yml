@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+old:
+  name: Old
+  slug: old
+
+new:
+  name: New
+  slug: new

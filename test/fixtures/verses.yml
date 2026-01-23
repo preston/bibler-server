@@ -1,0 +1,33 @@
+# frozen_string_literal: true
+
+verse1_test1:
+  bible: test1
+  book: genesis_test1
+  chapter: 1
+  ordinal: 1
+  text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+  slug: 1
+
+verse2_test1:
+  bible: test1
+  book: genesis_test1
+  chapter: 1
+  ordinal: 2
+  text: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+  slug: 2
+
+verse1_test2:
+  bible: test2
+  book: genesis_test2
+  chapter: 1
+  ordinal: 1
+  text: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+  slug: 1
+
+verse2_test2:
+  bible: test2
+  book: genesis_test2
+  chapter: 1
+  ordinal: 2
+  text: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+  slug: 2

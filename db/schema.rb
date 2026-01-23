@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 1) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_22_231719) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,6 +39,18 @@ ActiveRecord::Schema[8.1].define(version: 1) do
     t.index ["bible_id", "slug"], name: "index_books_on_bible_id_and_slug"
     t.index ["bible_id"], name: "index_books_on_bible_id"
     t.index ["ordinal"], name: "index_books_on_ordinal"
+  end
+
+  create_table "mcp_sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "initialized_at", null: false
+    t.datetime "last_activity_at", null: false
+    t.string "last_event_id"
+    t.jsonb "metadata"
+    t.string "session_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["last_activity_at"], name: "index_mcp_sessions_on_last_activity_at"
+    t.index ["session_id"], name: "index_mcp_sessions_on_session_id", unique: true
   end
 
   create_table "testaments", id: :serial, force: :cascade do |t|

@@ -11,4 +11,10 @@ Rails.application.routes.draw do
   get ':bible/:book' => 'verses#chapters', as: :bible_book_chapters
   get ':bible/:book/:chapter' => 'verses#verses', as: :bible_book_chapter_verses
   post ':bible/search' => 'verses#search', as: :bible_search
+
+  # MCP (Model Context Protocol) endpoints
+  # POST for JSON-RPC command channel (regular JSON responses)
+  # GET for SSE announcement channel (streaming)
+  post 'mcp', to: 'mcp#handle'
+  get 'mcp', to: 'mcp_stream#stream'
 end
