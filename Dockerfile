@@ -6,7 +6,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Install compilation tools, PostgreSQL client, and PostgreSQL client header files (libpq-dev)
 RUN apt update
-RUN apt install -y build-essential postgresql-client libpq-dev
+RUN apt install -y build-essential postgresql-client libpq-dev libyaml-dev
 
 
 

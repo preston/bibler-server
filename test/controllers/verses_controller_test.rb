@@ -3,7 +3,7 @@
 require 'test_helper'
 
 # Author: Preston Lee
-class VersesControllerTest < ActionController::TestCase
+class VersesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @bible = Bible.first
     @book = Book.first
@@ -12,14 +12,18 @@ class VersesControllerTest < ActionController::TestCase
   end
 
   test 'should get verses for chapter' do
-    get :verses, params: { bible: @bible.slug, book: @book.slug, chapter: @chapter, format: :json }
+    get "/#{@bible.slug}/#{@book.slug}/#{@chapter}.json"
     assert_response :success
-    assert_not_nil assigns(:verses)
+    json = JSON.parse(response.body)
+    assert_kind_of Array, json
+    assert_operator json.length, :>, 0
   end
 
   test 'should show verse' do
-    get :show, params: { bible: @bible.slug, book: @book.slug, chapter: @chapter, ordinal: @ordinal, format: :json }
-    assert_not_nil assigns(:verse)
+    get "/#{@bible.slug}/#{@book.slug}/#{@chapter}/#{@ordinal}.json"
     assert_response :success
+    json = JSON.parse(response.body)
+    assert_equal @chapter, json['chapter']
+    assert_equal @ordinal, json['ordinal']
   end
 end

@@ -3,20 +3,24 @@
 require 'test_helper'
 
 # Author: Preston Lee
-class BiblesControllerTest < ActionController::TestCase
+class BiblesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @bible = Bible.first
   end
 
   test 'should get index' do
-    get :index, format: :json
+    get '/bibles.json'
     assert_response :success
-    assert_not_nil assigns(:bibles)
+    json = JSON.parse(response.body)
+    assert_kind_of Array, json
+    assert_operator json.length, :>, 0
   end
 
   test 'should show bible' do
-    get :show, params: { id: @bible.slug, format: :json }
-    assert_not_nil assigns(:bible)
+    get "/bibles/#{@bible.slug}.json"
     assert_response :success
+    json = JSON.parse(response.body)
+    assert_equal @bible.slug, json['slug']
+    assert_equal @bible.name, json['name']
   end
 end
