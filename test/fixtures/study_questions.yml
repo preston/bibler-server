@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: 55555555-5555-5555-5555-555555555551
+  study: one
+  prompt: What does transformed thinking look like in daily life?
+  question_type: application
+  guidance_notes: Point learners back to Romans 12:2.
+  verse_anchor: {"book":"romans","chapter":12,"ordinal":2}
+  position: 0
+
+two:
+  uuid: 55555555-5555-5555-5555-555555555552
+  study: two
+  prompt: How does John 3:16 shape evangelism?
+  question_type: discussion
+  guidance_notes: Ask for verse-backed responses.
+  verse_anchor: {"book":"john","chapter":3,"ordinal":16}
+  position: 0

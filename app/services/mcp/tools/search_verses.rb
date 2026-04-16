@@ -13,7 +13,7 @@ module Mcp
             properties: {
               bible: {
                 type: 'string',
-                description: 'Bible identifier (slug or ID)'
+                description: 'Bible UUID'
               },
               query: {
                 type: 'string',

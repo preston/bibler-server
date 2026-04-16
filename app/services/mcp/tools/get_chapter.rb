@@ -13,11 +13,11 @@ module Mcp
             properties: {
               bible: {
                 type: 'string',
-                description: 'Bible identifier (slug or ID)'
+                description: 'Bible UUID'
               },
               book: {
                 type: 'string',
-                description: 'Book identifier (slug or ID)'
+                description: 'Book UUID'
               },
               chapter: {
                 type: 'integer',

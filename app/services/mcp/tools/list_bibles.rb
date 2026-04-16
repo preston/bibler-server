@@ -38,10 +38,9 @@ module Mcp
               text: JSON.pretty_generate(
                 bibles.order(:name).map do |bible|
                   {
-                    id: bible.id,
+                    uuid: bible.uuid,
                     name: bible.name,
                     abbreviation: bible.abbreviation,
-                    slug: bible.slug,
                     language: bible.language,
                     license: bible.license
                   }

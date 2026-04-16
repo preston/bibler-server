@@ -13,7 +13,7 @@ module Mcp
             properties: {
               bible: {
                 type: 'string',
-                description: 'Bible identifier (slug or ID, optional - lists all books if omitted)'
+                description: 'Bible UUID (optional - lists all books if omitted)'
               }
             },
             required: []
@@ -42,9 +42,8 @@ module Mcp
               text: JSON.pretty_generate(
                 books.map do |book|
                   {
-                    id: book.id,
+                    uuid: book.uuid,
                     name: book.name,
-                    slug: book.slug,
                     ordinal: book.ordinal,
                     testament: book.testament.name,
                     bible: book.bible.name

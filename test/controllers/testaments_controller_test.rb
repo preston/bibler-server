@@ -5,7 +5,7 @@ require 'test_helper'
 # Author: Preston Lee
 class TestamentsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @testament = Testament.where(slug: :new).first
+    @testament = testaments(:new)
   end
 
   test 'should get index' do
@@ -17,10 +17,10 @@ class TestamentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show testament' do
-    get "/testaments/#{@testament.id}.json"
+    get "/testaments/#{@testament.uuid}.json"
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal @testament.slug, json['slug']
+    assert_equal @testament.uuid, json['uuid']
     assert_equal @testament.name, json['name']
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Author: Preston Lee
-class McpSession < ActiveRecord::Base
+class McpSession < ApplicationRecord
   validates_presence_of :session_id
   validates_uniqueness_of :session_id
 

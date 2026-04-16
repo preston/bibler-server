@@ -11,7 +11,7 @@ namespace :bibler do
     count = 0
     book = nil
     CSV.open(file, headers: true).each do |r|
-      if book && book.slug == r[0]
+      if book && book.id.to_s == r[0].to_s
         # We already have the book loaded.
       else
         book = Book.find(r[0])
@@ -142,17 +142,13 @@ namespace :bibler do
             book = book_cache[book_name]
             next unless book
 
-            # Generate slug manually for bulk insert (friendly_id uses ordinal as base, scoped to bible/book/chapter)
-            # Since it's scoped, the slug is just the ordinal as a string
-            slug = verse_ordinal.to_s
-
             verse_records << {
               bible_id: bible.id,
               book_id: book.id,
               chapter:,
               ordinal: verse_ordinal,
               text:,
-              slug:,
+              uuid: SecureRandom.uuid,
               created_at: Time.current,
               updated_at: Time.current
             }

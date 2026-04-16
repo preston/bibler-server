@@ -1,12 +1,18 @@
 # frozen_string_literal: true
 
 # Author: Preston Lee
-class Testament < ActiveRecord::Base
+class Testament < ApplicationRecord
   has_many :books, dependent: :destroy
-
-  extend FriendlyId
-  friendly_id :name, use: %i[slugged finders]
+  before_validation :ensure_uuid
 
   validates_presence_of :name
+  validates_presence_of :uuid
   validates_uniqueness_of :name
+  validates_uniqueness_of :uuid
+
+  private
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
+  end
 end

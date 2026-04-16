@@ -19,7 +19,7 @@ class Mcp::ToolHandlerTest < ActiveSupport::TestCase
 
   test 'should call search_verses tool' do
     arguments = {
-      'bible' => @bible.slug,
+      'bible' => @bible.uuid,
       'query' => 'Lorem'
     }
     result = Mcp::ToolHandler.call('search_verses', arguments)
@@ -30,8 +30,8 @@ class Mcp::ToolHandlerTest < ActiveSupport::TestCase
     book = @bible.books.first
     verse = Verse.where(bible: @bible, book: book).first
     arguments = {
-      'bible' => @bible.slug,
-      'book' => book.slug,
+      'bible' => @bible.uuid,
+      'book' => book.uuid,
       'chapter' => verse.chapter,
       'verse' => verse.ordinal
     }

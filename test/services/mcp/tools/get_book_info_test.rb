@@ -19,8 +19,8 @@ class Mcp::Tools::GetBookInfoTest < ActiveSupport::TestCase
 
   test 'should get book info with valid arguments' do
     arguments = {
-      'bible' => @bible.slug,
-      'book' => @book.slug
+      'bible' => @bible.uuid,
+      'book' => @book.uuid
     }
     result = @tool.call(arguments)
     assert_not_nil result[:content]
@@ -32,7 +32,7 @@ class Mcp::Tools::GetBookInfoTest < ActiveSupport::TestCase
 
   test 'should require bible parameter' do
     arguments = {
-      'book' => @book.slug
+      'book' => @book.uuid
     }
     assert_raises(ArgumentError) do
       @tool.call(arguments)
@@ -41,7 +41,7 @@ class Mcp::Tools::GetBookInfoTest < ActiveSupport::TestCase
 
   test 'should require book parameter' do
     arguments = {
-      'bible' => @bible.slug
+      'bible' => @bible.uuid
     }
     assert_raises(ArgumentError) do
       @tool.call(arguments)
@@ -50,7 +50,7 @@ class Mcp::Tools::GetBookInfoTest < ActiveSupport::TestCase
 
   test 'should handle non-existent book' do
     arguments = {
-      'bible' => @bible.slug,
+      'bible' => @bible.uuid,
       'book' => 'non-existent'
     }
     assert_raises(ActiveRecord::RecordNotFound) do

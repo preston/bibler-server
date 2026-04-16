@@ -30,13 +30,13 @@ module Mcp
       end
 
       def find_bible(bible_identifier)
-        bible = Bible.find_by(id: bible_identifier) || Bible.find_by(slug: bible_identifier)
+        bible = Bible.find_by(uuid: bible_identifier)
         raise ActiveRecord::RecordNotFound, "Bible not found: #{bible_identifier}" unless bible
         bible
       end
 
       def find_book(bible, book_identifier)
-        book = bible.books.find_by(id: book_identifier) || bible.books.find_by(slug: book_identifier)
+        book = bible.books.find_by(uuid: book_identifier)
         raise ActiveRecord::RecordNotFound, "Book not found: #{book_identifier}" unless book
         book
       end

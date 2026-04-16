@@ -7,6 +7,6 @@ class BiblesController < ApplicationController
   end
 
   def show
-    @bible = Bible.find(params[:id])
+    @bible = Bible.find_by!(uuid: params[:uuid])
   end
 end

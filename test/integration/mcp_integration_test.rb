@@ -50,8 +50,8 @@ class McpIntegrationTest < ActionDispatch::IntegrationTest
       params: {
         name: 'get_verse',
         arguments: {
-          bible: @bible.slug,
-          book: @book.slug,
+          bible: @bible.uuid,
+          book: @book.uuid,
           chapter: @verse.chapter,
           verse: @verse.ordinal
         }
@@ -132,8 +132,8 @@ class McpIntegrationTest < ActionDispatch::IntegrationTest
       params: {
         name: 'get_verse',
         arguments: {
-          bible: @bible.slug,
-          book: @book.slug,
+          bible: @bible.uuid,
+          book: @book.uuid,
           chapter: @verse.chapter,
           verse: @verse.ordinal
         }
@@ -144,7 +144,7 @@ class McpIntegrationTest < ActionDispatch::IntegrationTest
     mcp_data = JSON.parse(mcp_json['result']['content'][0]['text'])
 
     # Get verse via REST API
-    get "/#{@bible.slug}/#{@book.slug}/#{@verse.chapter}/#{@verse.ordinal}.json"
+    get "/#{@bible.uuid}/#{@book.uuid}/#{@verse.chapter}/#{@verse.ordinal}.json"
     rest_json = JSON.parse(response.body)
 
     # Verify data matches

@@ -104,17 +104,13 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
       book = book_cache[book_name]
       next unless book
 
-      # Generate slug manually for bulk insert (friendly_id uses ordinal as base, scoped to bible/book/chapter)
-      # Since it's scoped, the slug is just the ordinal as a string
-      slug = verse_ordinal.to_s
-
       verse_records << {
         bible_id: bible.id,
         book_id: book.id,
         chapter:,
         ordinal: verse_ordinal,
         text:,
-        slug:,
+        uuid: SecureRandom.uuid,
         created_at: Time.current,
         updated_at: Time.current
       }
@@ -170,3 +166,50 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
 end
 
 puts 'Done!'
+
+# Configure default AI reference bibles (idempotent).
+puts 'Configuring AI default reference bibles...'
+Bible.update_all(
+  ai_default_english: false,
+  ai_default_greek: false,
+  ai_default_hebrew_ot: false,
+  ai_default_aramaic: false
+)
+
+ai_default_targets = {
+  ai_default_english: 'KJV',
+  ai_default_greek: 'Byz',
+  ai_default_hebrew_ot: 'HebModern'
+}
+
+ai_default_targets.each do |flag, abbreviation|
+  bible = Bible.find_by('LOWER(abbreviation) = ?', abbreviation.downcase)
+  if bible
+    bible.update!(flag => true)
+    puts "Set #{bible.abbreviation} as #{flag}."
+  else
+    puts "Warning: Could not find Bible with abbreviation #{abbreviation} to set #{flag}."
+  end
+end
+
+# RBAC bootstrap (idempotent). Change the default password in production.
+puts 'Bootstrapping RBAC...'
+admin_role = Role.find_or_create_by!(name: 'Administrator') do |r|
+  r.is_default = false
+  r.administrator = true
+  r.bibles = true
+  r.access = true
+  r.curation = true
+end
+admin_user = User.find_or_initialize_by(username: 'administrator')
+if admin_user.new_record?
+  admin_user.email = 'administrator@localhost'
+  admin_user.name = 'Administrator'
+  admin_user.password = 'password'
+  admin_user.password_confirmation = 'password'
+  admin_user.save!
+else
+  admin_user.update!(email: admin_user.email.presence || 'administrator@localhost', name: admin_user.name.presence || 'Administrator')
+end
+admin_user.roles << admin_role unless admin_user.roles.include?(admin_role)
+puts 'RBAC bootstrap complete.'

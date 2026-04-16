@@ -5,11 +5,9 @@ class BooksController < ApplicationController
   def index
     @books = Book.includes(:testament, :bible)
     
-    # Filter by bible if bible_id is provided (from nested route or query param)
-    bible_id = params[:bible_id] || params[:id]
-    if bible_id.present?
-      # Handle both ID and slug lookups for bible
-      bible = Bible.find_by(id: bible_id) || Bible.find_by(slug: bible_id)
+    bible_uuid = params[:bible_uuid] || params[:bible_id]
+    if bible_uuid.present?
+      bible = Bible.find_by(uuid: bible_uuid)
       if bible
         @books = @books.where(bible_id: bible.id)
       end
@@ -19,17 +17,16 @@ class BooksController < ApplicationController
   end
 
   def show
-    # If bible_id is provided (from nested route), scope the lookup to that bible
-    if params[:bible_id].present?
-      bible = Bible.find_by(id: params[:bible_id]) || Bible.find_by(slug: params[:bible_id])
+    if params[:bible_uuid].present?
+      bible = Bible.find_by(uuid: params[:bible_uuid])
       if bible
-        @book = bible.books.find(params[:id])
+        @book = bible.books.find_by!(uuid: params[:uuid])
       else
         head :not_found
         return
       end
     else
-      @book = Book.find(params[:id])
+      @book = Book.find_by!(uuid: params[:uuid])
     end
   end
 end

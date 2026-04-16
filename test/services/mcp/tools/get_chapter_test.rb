@@ -20,8 +20,8 @@ class Mcp::Tools::GetChapterTest < ActiveSupport::TestCase
 
   test 'should get chapter with valid arguments' do
     arguments = {
-      'bible' => @bible.slug,
-      'book' => @book.slug,
+      'bible' => @bible.uuid,
+      'book' => @book.uuid,
       'chapter' => @chapter
     }
     result = @tool.call(arguments)
@@ -34,8 +34,8 @@ class Mcp::Tools::GetChapterTest < ActiveSupport::TestCase
   test 'should require all parameters' do
     ['bible', 'book', 'chapter'].each do |param|
       arguments = {
-        'bible' => @bible.slug,
-        'book' => @book.slug,
+        'bible' => @bible.uuid,
+        'book' => @book.uuid,
         'chapter' => @chapter
       }
       arguments.delete(param)
@@ -47,8 +47,8 @@ class Mcp::Tools::GetChapterTest < ActiveSupport::TestCase
 
   test 'should handle non-existent chapter' do
     arguments = {
-      'bible' => @bible.slug,
-      'book' => @book.slug,
+      'bible' => @bible.uuid,
+      'book' => @book.uuid,
       'chapter' => 999
     }
     result = @tool.call(arguments)

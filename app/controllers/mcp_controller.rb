@@ -67,8 +67,6 @@ class McpController < ApplicationController
       handle_tools_list(id)
     when 'tools/call'
       handle_tools_call(params, id)
-    when 'ping'
-      handle_ping(id, session)
     else
       jsonrpc_error(-32601, 'Method not found', "Unknown method: #{method}", id)
     end
@@ -120,17 +118,6 @@ class McpController < ApplicationController
     jsonrpc_error(-32602, 'Invalid params', e.message, id)
   rescue ActiveRecord::RecordNotFound => e
     jsonrpc_error(-32001, 'Resource not found', e.message, id)
-  end
-
-  def handle_ping(id, session)
-    # Ping/pong for connection health verification
-    # Returns empty result immediately as per MCP spec
-    # Session activity is already updated in handle() method
-    {
-      jsonrpc: '2.0',
-      id: id,
-      result: {}
-    }
   end
 
   def jsonrpc_error(code, message, data = nil, id = nil)

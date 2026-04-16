@@ -17,10 +17,10 @@ class BiblesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show bible' do
-    get "/bibles/#{@bible.slug}.json"
+    get "/bibles/#{@bible.uuid}.json"
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal @bible.slug, json['slug']
+    assert_equal @bible.uuid, json['uuid']
     assert_equal @bible.name, json['name']
   end
 end

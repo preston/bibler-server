@@ -7,6 +7,6 @@ class TestamentsController < ApplicationController
   end
 
   def show
-    @testament = Testament.find(params[:id])
+    @testament = Testament.find_by!(uuid: params[:uuid])
   end
 end

@@ -1,11 +1,53 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  resources :testaments, only: %i[index show]
-  resources :books, only: %i[index show]
-  # resources :verses, only: [:index, :show]
-  resources :bibles, only: %i[index show] do
-    resources :books, only: %i[index show], controller: 'books'
+  devise_for :users, skip: :registrations
+
+  post '/session', to: 'sessions#create', defaults: { format: :json }
+  get '/session', to: 'sessions#show', defaults: { format: :json }
+  delete '/session', to: 'sessions#destroy', defaults: { format: :json }
+
+  # Studies and AI routes must appear before generic verse routes.
+  get '/ai/health', to: 'ai#health'
+  get '/ai/models', to: 'ai#models'
+  post '/ai/chat', to: 'ai#chat'
+
+  resources :studies, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
+    resource :role, controller: :study_roles, only: %i[show update], defaults: { format: :json }
+    get '/modes', to: 'study_roles#show'
+    match '/modes/mode', to: 'study_roles#update', via: %i[patch put post]
+    resources :study_verses, path: :verses, param: :uuid, only: %i[index create update destroy], defaults: { format: :json }
+    resources :study_commentaries, path: :commentaries, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json }
+    resources :study_questions, path: :questions, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
+      post :reorder, on: :collection
+      resources :study_answers, path: :answers, param: :uuid, only: %i[index create update destroy], defaults: { format: :json }
+    end
+    resources :study_tasks, path: :tasks, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
+      post :reorder, on: :collection
+    end
+    resources :study_plan_items, path: :plan_items, param: :uuid, only: %i[index create update destroy], defaults: { format: :json } do
+      post :reorder, on: :collection
+      patch :state, on: :member, action: :update_state
+    end
+
+    scope module: :studies do
+      post '/ai/generate_commentary', to: 'ai#generate_commentary'
+      post '/ai/summarize', to: 'ai#summarize'
+      post '/ai/generate_questions', to: 'ai#generate_questions'
+      post '/ai/assistant', to: 'ai#assistant'
+    end
+  end
+
+  resources :testaments, param: :uuid, only: %i[index show]
+  resources :books, param: :uuid, only: %i[index show]
+  resources :bibles, param: :uuid, only: %i[index show] do
+    resources :books, param: :uuid, only: %i[index show], controller: 'books'
+  end
+  namespace :system do
+    resources :roles, only: %i[index show create update destroy], defaults: { format: :json }
+    resources :users, only: %i[index show create update], defaults: { format: :json }
+    get '/settings/ai_defaults', to: 'settings#ai_defaults'
+    patch '/settings/ai_defaults', to: 'settings#update_ai_defaults'
   end
   get ':bible/:book/:chapter/:ordinal' => 'verses#show', as: :verse_lookup
   get ':bible/:book' => 'verses#chapters', as: :bible_book_chapters

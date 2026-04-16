@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: 33333333-3333-3333-3333-333333333331
+  study: one
+  bible_uuid: 00000000-0000-0000-0000-000000000101
+  book_uuid: 00000000-0000-0000-0000-000000000201
+  chapter: 12
+  ordinal: 2
+  verse_text: Be transformed by renewing of your mind.
+  note: Key discipleship verse.
+  position: 0
+
+two:
+  uuid: 33333333-3333-3333-3333-333333333332
+  study: two
+  bible_uuid: 00000000-0000-0000-0000-000000000101
+  book_uuid: 00000000-0000-0000-0000-000000000201
+  chapter: 3
+  ordinal: 16
+  verse_text: For God so loved the world.
+  note: Gospel foundation.
+  position: 0

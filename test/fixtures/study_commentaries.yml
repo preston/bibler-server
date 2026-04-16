@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: 44444444-4444-4444-4444-444444444441
+  study: one
+  source_type: manual
+  title: Opening Insight
+  body: Introduce the context of Romans 12.
+  prompt: ''
+  context: {}
+  position: 0
+
+two:
+  uuid: 44444444-4444-4444-4444-444444444442
+  study: two
+  source_type: ai
+  title: Gospel Summary
+  body: A concise summary focused on John 3:16.
+  prompt: Summarize John 3:16
+  context: {}
+  position: 0

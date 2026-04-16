@@ -51,7 +51,7 @@ class McpControllerTest < ActionDispatch::IntegrationTest
       params: {
         name: 'search_verses',
         arguments: {
-          bible: @bible.slug,
+          bible: @bible.uuid,
           query: 'Lorem'
         }
       }
@@ -72,8 +72,8 @@ class McpControllerTest < ActionDispatch::IntegrationTest
       params: {
         name: 'get_verse',
         arguments: {
-          bible: @bible.slug,
-          book: @book.slug,
+          bible: @bible.uuid,
+          book: @book.uuid,
           chapter: @verse.chapter,
           verse: @verse.ordinal
         }

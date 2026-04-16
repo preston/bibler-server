@@ -18,7 +18,7 @@ class Mcp::Tools::SearchVersesTest < ActiveSupport::TestCase
 
   test 'should search verses with valid arguments' do
     arguments = {
-      'bible' => @bible.slug,
+      'bible' => @bible.uuid,
       'query' => 'Lorem'
     }
     result = @tool.call(arguments)
@@ -37,7 +37,7 @@ class Mcp::Tools::SearchVersesTest < ActiveSupport::TestCase
 
   test 'should require query parameter' do
     arguments = {
-      'bible' => @bible.slug
+      'bible' => @bible.uuid
     }
     assert_raises(ArgumentError) do
       @tool.call(arguments)
@@ -46,7 +46,7 @@ class Mcp::Tools::SearchVersesTest < ActiveSupport::TestCase
 
   test 'should respect limit parameter' do
     arguments = {
-      'bible' => @bible.slug,
+      'bible' => @bible.uuid,
       'query' => 'Lorem',
       'limit' => 1
     }

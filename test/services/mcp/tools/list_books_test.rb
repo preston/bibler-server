@@ -18,7 +18,7 @@ class Mcp::Tools::ListBooksTest < ActiveSupport::TestCase
 
   test 'should list books for specific bible' do
     arguments = {
-      'bible' => @bible.slug
+      'bible' => @bible.uuid
     }
     result = @tool.call(arguments)
     assert_not_nil result[:content]

@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  uuid: 77777777-7777-7777-7777-777777777771
+  study_question: one
+  study: one
+  study_commentary: one
+  response: Renewed thinking starts with scripture obedience.
+  author_label: Participant 1
+  visibility: study
+
+two:
+  uuid: 77777777-7777-7777-7777-777777777772
+  study_question: two
+  study: two
+  study_commentary: two
+  response: God's love motivates gospel outreach.
+  author_label: Participant 2
+  visibility: leaders

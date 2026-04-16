@@ -1,20 +1,28 @@
 # frozen_string_literal: true
 
 # Author: Preston Lee
-class Bible < ActiveRecord::Base
+class Bible < ApplicationRecord
   has_many :verses, dependent: :destroy
   has_many :books, dependent: :destroy
-
-  extend FriendlyId
-  friendly_id :slug_candidates, use: %i[slugged finders]
+  before_validation :ensure_uuid
 
   validates_presence_of :name
   validates_presence_of :abbreviation
-  validates_presence_of :slug
+  validates_presence_of :uuid
   validates_presence_of :language
 
   validates_uniqueness_of :name, scope: :language
   validates_uniqueness_of :abbreviation
+  validates_uniqueness_of :uuid
+  validates_uniqueness_of :ai_default_english, if: :ai_default_english?
+  validates_uniqueness_of :ai_default_hebrew_ot, if: :ai_default_hebrew_ot?
+  validates_uniqueness_of :ai_default_greek, if: :ai_default_greek?
+  validates_uniqueness_of :ai_default_aramaic, if: :ai_default_aramaic?
+
+  scope :ai_default_english, -> { where(ai_default_english: true) }
+  scope :ai_default_hebrew_ot, -> { where(ai_default_hebrew_ot: true) }
+  scope :ai_default_greek, -> { where(ai_default_greek: true) }
+  scope :ai_default_aramaic, -> { where(ai_default_aramaic: true) }
 
   # Mapping of language codes to human-readable names
   LANGUAGE_NAMES = {
@@ -92,10 +100,24 @@ class Bible < ActiveRecord::Base
     'sml' => 'Central Sama'
   }.freeze
 
-  def slug_candidates
-    [
-      [:name],
-      %i[name abbreviation]
-    ]
+  def self.default_ai_reference_bibles
+    {
+      english: ai_default_english.first || by_language_fallback(%w[en]),
+      hebrew_ot: ai_default_hebrew_ot.first || by_language_fallback(%w[hbo he]),
+      greek: ai_default_greek.first || by_language_fallback(%w[grc el]),
+      aramaic: ai_default_aramaic.first || by_language_fallback(%w[arc syr])
+    }.transform_values do |b|
+      b&.slice(:uuid, :abbreviation, :name, :language)
+    end
+  end
+
+  def self.by_language_fallback(codes)
+    where(language: codes).order(:id).first
+  end
+
+  private
+
+  def ensure_uuid
+    self.uuid ||= SecureRandom.uuid
   end
 end

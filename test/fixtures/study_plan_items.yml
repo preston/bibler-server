@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  study: one
+  uuid: 33333333-1111-1111-1111-111111111111
+  title: Welcome and Opening Prayer
+  item_type: custom
+  notes: Kick off lesson
+  metadata: {}
+  position: 0
+  duration: 0
+
+two:
+  study: two
+  uuid: 33333333-2222-2222-2222-222222222222
+  title: Read John 1
+  item_type: verse
+  notes: Read together
+  metadata: {}
+  position: 1
+  duration: 2

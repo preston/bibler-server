@@ -17,10 +17,10 @@ class BooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show book' do
-    get "/books/#{@book.id}.json"
+    get "/books/#{@book.uuid}.json"
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal @book.slug, json['slug']
+    assert_equal @book.uuid, json['uuid']
     assert_equal @book.name, json['name']
   end
 end

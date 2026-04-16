@@ -20,8 +20,8 @@ class Mcp::Tools::GetVerseTest < ActiveSupport::TestCase
 
   test 'should get verse with valid arguments' do
     arguments = {
-      'bible' => @bible.slug,
-      'book' => @book.slug,
+      'bible' => @bible.uuid,
+      'book' => @book.uuid,
       'chapter' => @verse.chapter,
       'verse' => @verse.ordinal
     }
@@ -35,8 +35,8 @@ class Mcp::Tools::GetVerseTest < ActiveSupport::TestCase
   test 'should require all parameters' do
     ['bible', 'book', 'chapter', 'verse'].each do |param|
       arguments = {
-        'bible' => @bible.slug,
-        'book' => @book.slug,
+        'bible' => @bible.uuid,
+        'book' => @book.uuid,
         'chapter' => @verse.chapter,
         'verse' => @verse.ordinal
       }
@@ -49,8 +49,8 @@ class Mcp::Tools::GetVerseTest < ActiveSupport::TestCase
 
   test 'should handle non-existent verse' do
     arguments = {
-      'bible' => @bible.slug,
-      'book' => @book.slug,
+      'bible' => @bible.uuid,
+      'book' => @book.uuid,
       'chapter' => 999,
       'verse' => 999
     }
@@ -62,7 +62,7 @@ class Mcp::Tools::GetVerseTest < ActiveSupport::TestCase
   test 'should handle non-existent bible' do
     arguments = {
       'bible' => 'non-existent',
-      'book' => @book.slug,
+      'book' => @book.uuid,
       'chapter' => @verse.chapter,
       'verse' => @verse.ordinal
     }

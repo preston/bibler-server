@@ -6,13 +6,13 @@ require 'test_helper'
 class VersesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @bible = Bible.first
-    @book = Book.first
+    @book = @bible.books.first
     @chapter = 1
     @ordinal = 1
   end
 
   test 'should get verses for chapter' do
-    get "/#{@bible.slug}/#{@book.slug}/#{@chapter}.json"
+    get "/#{@bible.uuid}/#{@book.uuid}/#{@chapter}.json"
     assert_response :success
     json = JSON.parse(response.body)
     assert_kind_of Array, json
@@ -20,7 +20,7 @@ class VersesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show verse' do
-    get "/#{@bible.slug}/#{@book.slug}/#{@chapter}/#{@ordinal}.json"
+    get "/#{@bible.uuid}/#{@book.uuid}/#{@chapter}/#{@ordinal}.json"
     assert_response :success
     json = JSON.parse(response.body)
     assert_equal @chapter, json['chapter']
