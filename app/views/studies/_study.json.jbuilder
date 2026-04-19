@@ -7,9 +7,6 @@ if study.owner
     json.name study.owner.name
   end
 end
-json.ai_system_prompt_effective Ollama::PromptPolicy.effective_study_system_prompt(study)
-json.ai_system_prompt_default Ollama::PromptPolicy::DEFAULT_STUDY_AI_SYSTEM_PROMPT
-json.ai_system_prompt_customized study.metadata.is_a?(Hash) && study.metadata['ai_system_prompt'].to_s.present?
 json.ai_default_reference_bibles Bible.default_ai_reference_bibles
 json.selected_bible_uuids study.selected_bible_uuids
 json.capabilities study.capabilities_for(mode)

@@ -132,7 +132,7 @@ class StudiesController < ApplicationController
       incoming = incoming.deep_stringify_keys
       base = @study&.persisted? && @study.metadata.is_a?(Hash) ? @study.metadata.deep_stringify_keys : {}
       merged = base.merge(incoming)
-      merged.delete('ai_system_prompt') if merged['ai_system_prompt'].to_s.blank?
+      merged.delete('ai_system_prompt')
       permitted[:metadata] = merged
     end
     permitted

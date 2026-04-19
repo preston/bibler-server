@@ -9,8 +9,8 @@ Rails.application.routes.draw do
 
   # Studies and AI routes must appear before generic verse routes.
   get '/ai/health', to: 'ai#health'
-  get '/ai/models', to: 'ai#models'
   post '/ai/chat', to: 'ai#chat'
+  post '/ai/comparator_commentary', to: 'ai#comparator_commentary'
 
   resources :studies, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
     resource :role, controller: :study_roles, only: %i[show update], defaults: { format: :json }

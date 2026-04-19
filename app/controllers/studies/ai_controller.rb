@@ -17,7 +17,8 @@ module Studies
       result = Ollama::ChatService.new.generate(
         prompt: params[:prompt].to_s,
         context: prompt_context,
-        model: params[:model]
+        model: nil,
+        system_message: Ollama::Prompts::StudyCommentary.generate_system_prompt
       )
       render json: result, status: result[:error].present? ? :unprocessable_entity : :ok
     end
@@ -32,7 +33,7 @@ module Studies
       result = Ollama::ChatService.new.generate(
         prompt: params[:prompt].presence || 'Provide a concise biblical summary of this study session.',
         context: prompt_context,
-        model: params[:model]
+        model: nil
       )
       render json: result, status: result[:error].present? ? :unprocessable_entity : :ok
     end
@@ -45,7 +46,7 @@ module Studies
       result = Ollama::ChatService.new.generate(
         prompt: params[:prompt].presence || 'Generate discussion questions anchored in scripture references from the provided study verses.',
         context: prompt_context,
-        model: params[:model]
+        model: nil
       )
       render json: result, status: result[:error].present? ? :unprocessable_entity : :ok
     end
@@ -57,7 +58,7 @@ module Studies
         result = Ollama::StudyAssistantOrchestrator.new(
           study: @study,
           user_message: params[:message].to_s,
-          model: params[:model],
+          model: nil,
           stream: false,
           reference_bible_uuids: params[:reference_bible_uuids]
         ).call
@@ -99,7 +100,7 @@ module Studies
         Ollama::StudyAssistantOrchestrator.new(
           study: @study,
           user_message: params[:message].to_s,
-          model: params[:model],
+          model: nil,
           stream: true,
           reference_bible_uuids: params[:reference_bible_uuids],
           on_event: writer

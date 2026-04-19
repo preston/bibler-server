@@ -14,6 +14,35 @@ module Ollama
       end
     end
 
+    class FakeChatRecording
+      attr_reader :system_messages
+
+      def initialize(outputs)
+        @outputs = outputs
+        @system_messages = []
+      end
+
+      def chat_with_system(system_message:, user_content:, model: nil)
+        @system_messages << system_message
+        { output: @outputs.shift }
+      end
+    end
+
+    test 'uses distinct system prompts for round a and round b' do
+      fake = FakeChatRecording.new(['{"searches":[]}', '{"suggestions":[]}'])
+      StudyAssistantOrchestrator.new(
+        study: studies(:one),
+        user_message: 'help me study',
+        model: nil,
+        chat_service: fake
+      ).call
+      assert_equal 2, fake.system_messages.size
+      assert_not_equal fake.system_messages[0], fake.system_messages[1]
+      assert_includes fake.system_messages[0], 'SEARCH PLANNING'
+      assert_includes fake.system_messages[0], 'pg_search'
+      refute_includes fake.system_messages[1], 'SEARCH PLANNING'
+    end
+
     test 'preserves suggestion order with order field matching array index' do
       round_b = '{"suggestions":[' \
         '{"id":"a","type":"add_verse","title":"first","summary":"s","payload":{}},' \
@@ -38,8 +67,9 @@ module Ollama
       assert_equal 'second', sugg[1]['title']
     end
 
-    test 'caps suggestions at 8' do
-      sugg = (0..12).map do |i|
+    test 'caps suggestions at MAX_SUGGESTIONS' do
+      max = Ollama::StudyAssistantOrchestrator::MAX_SUGGESTIONS
+      sugg = (0..max).map do |i|
         %({"id":"#{i}","type":"add_verse","title":"t","summary":"s","payload":{}})
       end.join(',')
       round_b = %({"suggestions":[#{sugg}]})
@@ -54,7 +84,7 @@ module Ollama
       )
       result = orch.call
       assert_nil result[:error]
-      assert_equal 8, result[:suggestions].size
+      assert_equal max, result[:suggestions].size
     end
 
     test 'normalizes optional duration from suggestion or payload' do

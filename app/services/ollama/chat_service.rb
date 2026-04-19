@@ -31,23 +31,50 @@ module Ollama
       }
     end
 
-    # Raw user message (no PromptPolicy.compose wrapper). Used by study assistant orchestration.
-    def chat_with_system(system_message:, user_content:, model: nil)
+    # Raw user message (no PromptPolicy.compose wrapper). Used by study assistant orchestration and comparator.
+    # When +parse_json_output+ is true, +message.content+ is parsed as JSON; +output+ and +raw['message']['content']+
+    # are the resulting Hash/Array and +structured_output+ is true. If the model returns prose (refusals, etc.),
+    # +output+ stays the string, +raw+ is unchanged, and +structured_output+ is false (still HTTP 200).
+    def chat_with_system(system_message:, user_content:, model: nil, parse_json_output: false, ollama_format: nil,
+                         ollama_options: nil, json_retry_on_prose: false)
+      messages = [
+        { role: 'system', content: system_message },
+        { role: 'user', content: user_content }
+      ]
       response = @client.chat(
         model: model,
-        messages: [
-          { role: 'system', content: system_message },
-          { role: 'user', content: user_content }
-        ]
+        messages: messages,
+        format: ollama_format,
+        options: ollama_options
       )
 
       return response if self.class.response_error?(response)
 
-      {
+      result = {
         model: response['model'],
         output: response.dig('message', 'content'),
         raw: response
       }
+      return result unless parse_json_output
+
+      parsed = parse_json_chat_result(response)
+      if json_retry_on_prose && parsed[:structured_output] == false
+        retry_system = "#{system_message}\n\n#{Prompts::Comparator.retry_enforcement_suffix}"
+        response2 = @client.chat(
+          model: model,
+          messages: [
+            { role: 'system', content: retry_system },
+            { role: 'user', content: user_content }
+          ],
+          format: ollama_format,
+          options: ollama_options
+        )
+        return response2 if self.class.response_error?(response2)
+
+        parsed = parse_json_chat_result(response2)
+      end
+
+      parsed
     end
 
     # Streaming chat; yields accumulated text via on_delta for each Ollama chunk.
@@ -73,6 +100,31 @@ module Ollama
         model: result['model'],
         output: accumulated,
         raw: result
+      }
+    end
+
+    private
+
+    def parse_json_chat_result(response)
+      content = response.dig('message', 'content')
+      parsed = ResponseJson.parse_object(content)
+      if parsed.nil?
+        return {
+          model: response['model'],
+          output: content,
+          raw: response,
+          structured_output: false
+        }
+      end
+
+      raw_payload = response.deep_dup
+      raw_payload['message']['content'] = parsed if raw_payload['message'].is_a?(Hash)
+
+      {
+        model: response['model'],
+        output: parsed,
+        raw: raw_payload,
+        structured_output: true
       }
     end
   end

@@ -2,8 +2,8 @@
 
 module Ollama
   class StudyAssistantOrchestrator
-    MAX_SUGGESTIONS = 8
-    MAX_SEARCH_ITEMS = 10
+    MAX_SUGGESTIONS = 16
+    MAX_SEARCH_ITEMS = 20
     SUGGESTION_TYPES = %w[add_verse add_commentary add_question add_task].freeze
 
     def initialize(study:, user_message:, model: nil, chat_service: nil, on_event: nil, stream: false, reference_bible_uuids: nil)
@@ -20,18 +20,26 @@ module Ollama
       return { error: 'User message is blank.' } if @user_message.blank?
 
       emit('started', {})
-      system = PromptPolicy.effective_study_system_prompt(@study)
+      system_search = Prompts::StudyAssistant.search_system_prompt
+      system_suggestions = Prompts::StudyAssistant.suggestions_system_prompt
       snapshot = build_study_snapshot
       catalog = build_bibles_catalog
-      selected_refs = selected_reference_bibles
+      selected_refs = reference_bibles_for_search
 
       emit('status', { phase: 'planning', message: 'Planning database searches…' })
-      round_a_content = round_a_user_content(snapshot: snapshot, catalog: catalog, selected_refs: selected_refs)
-      a_resp = run_llm_round(system: system, user_content: round_a_content, round: 'a')
+      round_a_content = Prompts::StudyAssistant.round_a_user_content(
+        user_message: @user_message,
+        snapshot: snapshot,
+        catalog: catalog,
+        selected_refs: selected_refs,
+        max_search_items: MAX_SEARCH_ITEMS
+      )
+      a_resp = run_llm_round(system: system_search, user_content: round_a_content, round: 'a')
       return emit_error_and_return(a_resp) if ChatService.response_error?(a_resp)
 
       plan = ResponseJson.parse_object(a_resp[:output].to_s) || {}
       searches = normalize_searches(plan['searches'] || plan[:searches])
+      searches = constrain_searches_to_reference_bibles(searches, selected_refs)
       emit('plan', { searches: searches_summary_for_ui(searches) })
 
       emit('status', { phase: 'searching', message: 'Searching your Bibles…' })
@@ -39,14 +47,16 @@ module Ollama
       emit('search_results', search_results_payload(search_result))
 
       emit('status', { phase: 'drafting', message: 'Drafting suggestions…' })
-      round_b_content = round_b_user_content(
+      round_b_content = Prompts::StudyAssistant.round_b_user_content(
+        user_message: @user_message,
         snapshot: snapshot,
         catalog: catalog,
-        user_message: @user_message,
+        selected_refs: selected_refs,
         search_result: search_result,
-        selected_refs: selected_refs
+        max_suggestions: MAX_SUGGESTIONS,
+        suggestion_types: SUGGESTION_TYPES
       )
-      b_resp = run_llm_round(system: system, user_content: round_b_content, round: 'b')
+      b_resp = run_llm_round(system: system_suggestions, user_content: round_b_content, round: 'b')
       return emit_error_and_return(b_resp) if ChatService.response_error?(b_resp)
 
       parsed = ResponseJson.parse_object(b_resp[:output].to_s) || {}
@@ -137,71 +147,6 @@ module Ollama
       end
     end
 
-    def round_a_user_content(snapshot:, catalog:, selected_refs:)
-      <<~PROMPT
-        ROUND 1 — SEARCH PLAN (JSON ONLY)
-
-        Output a single JSON object and nothing else (no markdown fences, no commentary).
-        Shape:
-        {"searches":[{"bible_uuid":"...","text":"search phrase","limit":10}]}
-
-        Rules:
-        - Use bible_uuid values from BIBLES_CATALOG below.
-        - At most #{MAX_SEARCH_ITEMS} search objects.
-        - Each limit must be <= 25.
-        - Search text should help retrieve relevant verses from the database for the user's goal.
-
-        USER_MESSAGE:
-        #{@user_message}
-
-        STUDY_SNAPSHOT:
-        #{JSON.pretty_generate(snapshot)}
-
-        BIBLES_CATALOG:
-        #{JSON.pretty_generate(catalog)}
-
-        REFERENCE_BIBLES:
-        #{JSON.pretty_generate(selected_refs)}
-      PROMPT
-    end
-
-    def round_b_user_content(snapshot:, catalog:, user_message:, search_result:, selected_refs:)
-      <<~PROMPT
-        ROUND 2 — SUGGESTIONS (JSON ONLY)
-
-        Output a single JSON object and nothing else (no markdown fences, no commentary).
-        Shape:
-        {"suggestions":[{"id":"stable-id","type":"add_verse","title":"short title","summary":"why this helps","payload":{}}]}
-
-        Rules:
-        - At most #{MAX_SUGGESTIONS} suggestions.
-        - type must be one of: #{SUGGESTION_TYPES.join(', ')}.
-        - Optional duration: include duration as an integer minutes estimate >= 0. Use 0 only when intentionally unspecified.
-        - For add_verse payload include: bible_uuid, book_uuid, chapter (number), ordinal (number), optional note — only for verses that appear in DATABASE_RESULTS or STUDY_SNAPSHOT.verses.
-        - For add_commentary: source_type (manual|ai), title, body, optional prompt, optional duration.
-        - For add_question: prompt, question_type (discussion|observation|interpretation|application), optional guidance_notes, optional duration.
-        - For add_task: instruction, task_type (discussion|reading|prayer|memorization|reflection), optional assignee_label, optional duration.
-        - Never invent verse text; summaries may paraphrase only what DATABASE_RESULTS contain.
-        - Each "summary" is stored as the plan step's notes in the UI: aim for about one sentence up to two short paragraphs (not only a title or a single short phrase unless that truly suffices); stay grounded in DATABASE_RESULTS and STUDY_SNAPSHOT.
-        - Order suggestions by priority: the first suggestion in the array is the most important; preserve that order in the JSON array.
-
-        USER_MESSAGE:
-        #{user_message}
-
-        STUDY_SNAPSHOT:
-        #{JSON.pretty_generate(snapshot)}
-
-        BIBLES_CATALOG:
-        #{JSON.pretty_generate(catalog)}
-
-        REFERENCE_BIBLES:
-        #{JSON.pretty_generate(selected_refs)}
-
-        DATABASE_RESULTS:
-        #{JSON.pretty_generate(verses: search_result[:verses], errors: search_result[:errors])}
-      PROMPT
-    end
-
     def selected_reference_bibles
       pool = build_bibles_catalog
       by_uuid = pool.index_by { |b| b[:uuid] }
@@ -211,6 +156,50 @@ module Ollama
                    Bible.default_ai_reference_bibles.values.compact.map { |b| by_uuid[b['uuid']] || by_uuid[b[:uuid]] }.compact
                  end
       selected.uniq { |b| b[:uuid] }
+    end
+
+    # Bibles allowed for Round-A search planning: UI reference list intersected with study metadata when set.
+    def reference_bibles_for_search
+      refs = selected_reference_bibles
+      study_uuids = @study.selected_bible_uuids
+      return refs if study_uuids.blank?
+
+      filtered = refs.select { |b| study_uuids.include?(b[:uuid].to_s) }
+      if filtered.empty?
+        Rails.logger.warn('[StudyAssistant] study selected_bible_uuids did not match any reference Bible; using reference list as-is')
+        refs
+      else
+        filtered
+      end
+    end
+
+    def constrain_searches_to_reference_bibles(searches, allowed_ref_rows)
+      allowed_uuids = allowed_ref_rows.map { |b| b[:uuid].to_s }.uniq
+      return [] if allowed_uuids.empty?
+
+      searches.filter_map do |s|
+        s = s.symbolize_keys
+        text = s[:text].to_s.strip
+        next nil if text.blank?
+
+        uuid = s[:bible_uuid].to_s.presence
+        if uuid.blank?
+          if allowed_uuids.length == 1
+            uuid = allowed_uuids.first
+            Rails.logger.info('[StudyAssistant] search omitted bible_uuid; defaulting to sole reference Bible')
+          else
+            Rails.logger.warn('[StudyAssistant] dropping search: bible_uuid missing with multiple reference Bibles')
+            next nil
+          end
+        elsif allowed_uuids.exclude?(uuid)
+          Rails.logger.warn("[StudyAssistant] dropping search: bible_uuid #{uuid} not in allowed reference set")
+          next nil
+        end
+
+        row = { text: text, bible_uuid: uuid }
+        row[:limit] = s[:limit] if s[:limit].present?
+        row
+      end
     end
 
     def normalize_searches(list)
@@ -257,9 +246,7 @@ module Ollama
         }
       end
 
-      if list.length > MAX_SUGGESTIONS
-        Rails.logger.info("[StudyAssistant] truncated suggestions from #{list.length} to #{MAX_SUGGESTIONS}")
-      end
+      Rails.logger.info("[StudyAssistant] truncated suggestions from #{list.length} to #{MAX_SUGGESTIONS}") if list.length > MAX_SUGGESTIONS
 
       out
     end

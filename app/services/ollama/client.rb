@@ -5,8 +5,13 @@ require 'json'
 
 module Ollama
   class Client
+    # Default when +model+ is omitted (e.g. /ai/chat, /ai/comparator_commentary). Swap tag to use another local model.
+    # DEFAULT_MODEL = 'robzilla/bibleai:bf16' # 128K context, 15GB
+    DEFAULT_MODEL = 'bigwest60/bible-scholar:latest' # 128K context, 4.9GB
+    # DEFAULT_MODEL = 'robzilla/gemmabible:latest' # 128K context, 5.8GB
+
     DEFAULT_OPEN_TIMEOUT_SECONDS = 2
-    DEFAULT_READ_TIMEOUT_SECONDS = 60
+    DEFAULT_READ_TIMEOUT_SECONDS = 180
     DEFAULT_WRITE_TIMEOUT_SECONDS = 30
     DEFAULT_RETRIES = 1
 
@@ -18,20 +23,18 @@ module Ollama
       base_url.present?
     end
 
-    def list_models
-      return unconfigured_error unless self.class.configured?
-
-      request_json('/api/tags', method: :get)
-    end
-
-    def chat(model:, messages:)
+    # Optional +format+ is Ollama structured output: "json" or a JSON Schema object (see Ollama API "format").
+    # Optional +options+ is passed through (e.g. +{ temperature: 0.2 }+).
+    def chat(model:, messages:, format: nil, options: nil)
       return unconfigured_error unless self.class.configured?
 
       payload = {
-        model: model.presence || 'qwen3.5:35b',
+        model: model.presence || DEFAULT_MODEL,
         messages: messages,
         stream: false
       }
+      payload[:format] = format if format.present?
+      payload[:options] = options if options.present?
 
       request_json('/api/chat', method: :post, payload: payload)
     end
@@ -41,7 +44,7 @@ module Ollama
       return unconfigured_error unless self.class.configured?
 
       payload = {
-        model: model.presence || 'qwen3.5:35b',
+        model: model.presence || DEFAULT_MODEL,
         messages: messages,
         stream: true
       }
@@ -115,7 +118,15 @@ module Ollama
             started_at: started_at,
             attempts: 1
           )
-          json = body.present? ? (JSON.parse(body) rescue {}) : {}
+          json = if body.present?
+                   begin
+                     JSON.parse(body)
+                   rescue StandardError
+                     {}
+                   end
+                 else
+                   {}
+                 end
           return { error: "Ollama request failed with status #{response.code}.", details: json }
         end
 
