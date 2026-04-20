@@ -59,14 +59,14 @@ class StudyAnswersController < ApplicationController
   end
 
   def set_study_question
-    @study_question = @study.study_questions.find_by(uuid: params[:study_question_uuid]) || @study.study_questions.find_by(id: params[:study_question_uuid])
+    @study_question = @study.study_questions.find_by(id: params[:study_question_uuid])
     return if @study_question
 
     render json: { error: 'Study question not found.' }, status: :not_found
   end
 
   def set_study_answer
-    @study_answer = @study_question.study_answers.find_by(uuid: params[:uuid]) || @study_question.study_answers.find_by(id: params[:uuid])
+    @study_answer = @study_question.study_answers.find_by(id: params[:uuid])
     return if @study_answer
 
     render json: { error: 'Study answer not found.' }, status: :not_found

@@ -3,32 +3,6 @@
 require 'csv'
 
 namespace :bibler do
-  desc 'Loads the New American Standard Bible'
-  task nasb: :environment do
-    bible = Bible.find_or_create_by(name: 'New American Standard Bible', abbreviation: 'nasb')
-    file = File.join(Rails.root, 'lib', 'tasks', 'bibler_nasb.csv')
-    puts "Loading #{file} into database... (will take a while)"
-    count = 0
-    book = nil
-    CSV.open(file, headers: true).each do |r|
-      if book && book.id.to_s == r[0].to_s
-        # We already have the book loaded.
-      else
-        book = Book.find(r[0])
-      end
-      verse = Verse.new(
-        bible:,
-        book:,
-        chapter: r[1],
-        ordinal: r[2],
-        text: r[3]
-      )
-      verse.save!
-      count += 1
-    end
-    puts "Loaded #{count} verses."
-  end
-
   desc 'Import all bible translations from bible_databases project'
   task :import, [:path] => :environment do |_t, args|
     require File.join(Rails.root, 'lib', 'bibler')
@@ -44,7 +18,7 @@ namespace :bibler do
 
     include Bibler::Data
 
-    # Bootstrap testaments, bibles, and books
+    # Bootstrap bibles (metadata from manifest)
     bootstrap!(base_path)
 
     # Load translation manifest
@@ -102,12 +76,12 @@ namespace :bibler do
 
         # Create books for this bible
         book_cache = {}
-        total_books = book_names_in_order.length
+        book_lookup_cache = {}
         book_names_in_order.each_with_index do |book_name, index|
           position = index + 1
-          # Normalize book name for testament determination, but keep original for storage
-          normalized_name = normalize_book_name(book_name)
-          testament = determine_testament(normalized_name, position, total_books)
+          # Classify from lookup key; always persist source-provided book_name exactly.
+          lookup_key = book_lookup_key(book_name)
+          testament = classify_book_testament(lookup_key)
 
           book = Book.find_or_create_by(bible:, name: book_name) do |b|
             b.testament = testament
@@ -122,6 +96,7 @@ namespace :bibler do
           end
 
           book_cache[book_name] = book
+          book_lookup_cache[lookup_key] ||= book
         end
 
         # Second pass: import verses
@@ -139,23 +114,26 @@ namespace :bibler do
 
             next unless book_name && chapter.positive? && verse_ordinal.positive? && text
 
-            book = book_cache[book_name]
+            book = book_cache[book_name] || book_lookup_cache[book_lookup_key(book_name)]
             next unless book
 
             verse_records << {
+              id: SecureRandom.uuid,
               bible_id: bible.id,
               book_id: book.id,
               chapter:,
               ordinal: verse_ordinal,
               text:,
-              uuid: SecureRandom.uuid,
               created_at: Time.current,
               updated_at: Time.current
             }
 
             # Batch inserts for better performance
             if verse_records.length >= 1000
-              Verse.insert_all(verse_records)
+              Verse.upsert_all(
+                verse_records,
+                unique_by: :index_verses_on_bible_book_chapter_ordinal
+              )
               count += verse_records.length
               verse_records = []
             end
@@ -163,7 +141,10 @@ namespace :bibler do
 
           # Insert remaining records
           if verse_records.any?
-            Verse.insert_all(verse_records)
+            Verse.upsert_all(
+              verse_records,
+              unique_by: :index_verses_on_bible_book_chapter_ordinal
+            )
             count += verse_records.length
           end
         else
@@ -176,8 +157,8 @@ namespace :bibler do
 
             next unless book_name && chapter.positive? && verse_ordinal.positive? && text
 
-            # Use exact book name from CSV to look up in cache
-            book = book_cache[book_name]
+            # Use exact source name first, then fallback lookup key for matching only.
+            book = book_cache[book_name] || book_lookup_cache[book_lookup_key(book_name)]
             unless book
               puts "\nWarning: Book '#{book_name}' not found in cache, skipping verse..."
               next

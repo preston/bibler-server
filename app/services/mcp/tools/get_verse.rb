@@ -66,7 +66,7 @@ module Mcp
                   chapter: verse.chapter,
                   verse: verse.ordinal,
                   bible: verse.bible.name,
-                  testament: verse.book.testament.name
+                  testament: verse.book.read_attribute(:testament)
                 }
               )
             }

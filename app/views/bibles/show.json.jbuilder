@@ -5,11 +5,8 @@ json.extract! @bible, :id, :uuid, :name, :abbreviation, :language, :license, :cr
 
 # Optionally include books if requested
 if params[:include]&.split(',')&.include?('books')
-  json.books @bible.books.includes(:testament).order('testament_id ASC', 'ordinal ASC') do |book|
+  json.books @bible.books.merge(Book.ordered_for_display) do |book|
     json.extract! book, :id, :uuid, :name, :ordinal, :created_at, :updated_at
-    json.testament do
-      json.uuid book.testament.uuid
-      json.path testament_path(book.testament.uuid, format: :json)
-    end
+    json.testament book.read_attribute(:testament)
   end
 end

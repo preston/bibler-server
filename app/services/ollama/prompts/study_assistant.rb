@@ -36,7 +36,7 @@ module Ollama
 
           SUGGESTION DRAFTING (ROUND 2) — ADDITIONAL RULES:
           - You output ONLY the JSON object described in the user message (no markdown).
-          - Follow ORIGINAL_USER_MESSAGE_AND_INSTRUCTIONS and STUDY_SNAPSHOT (especially study.goal, study.metadata, and study.plan_total_duration_minutes) when shaping suggestions.
+          - Follow ORIGINAL_USER_MESSAGE_AND_INSTRUCTIONS and STUDY_SNAPSHOT (especially study.goal and study.plan_total_duration_minutes) when shaping suggestions.
           - Suggestions must be actionable for a study leader: clear titles, substantive summaries, and correct payload fields.
           - Ground every add_verse in DATABASE_RESULTS (verse text and identifiers) or in STUDY_SNAPSHOT.verses. Never invent verse text or references.
           - If DATABASE_RESULTS has few verses, still produce helpful add_commentary, add_question, add_task, and add_worship items that fit the user's request, clearly scoped to what scripture in DATABASE_RESULTS does support, and use questions/tasks/worship where application is broader than the verse hits.
@@ -138,7 +138,7 @@ module Ollama
         <<~PROMPT
           ROUND 2 — SUGGESTIONS (JSON ONLY)
 
-          Use STUDY_SNAPSHOT below for study metadata (study.metadata), goal (study.goal), and existing plan duration hint (study.plan_total_duration_minutes). The leader's instructions for this request are under ORIGINAL_USER_MESSAGE_AND_INSTRUCTIONS.
+          Use STUDY_SNAPSHOT below for study goal (study.goal) and existing plan duration hint (study.plan_total_duration_minutes). The leader's instructions for this request are under ORIGINAL_USER_MESSAGE_AND_INSTRUCTIONS.
 
           Output a single JSON object and nothing else (no markdown fences, no commentary).
           Shape:

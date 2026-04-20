@@ -1,9 +1,0 @@
-# frozen_string_literal: true
-
-old:
-  uuid: 00000000-0000-0000-0000-000000000301
-  name: Old
-
-new:
-  uuid: 00000000-0000-0000-0000-000000000302
-  name: New

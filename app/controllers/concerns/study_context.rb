@@ -12,7 +12,7 @@ module StudyContext
   private
 
   def set_study
-    @study = Study.find_by(uuid: params[:study_uuid])
+    @study = Study.find_by(id: params[:study_uuid])
     return if @study
 
     render json: { error: 'Study not found.' }, status: :not_found

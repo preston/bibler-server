@@ -9,8 +9,5 @@ json.array!(@books) do |b|
     json.abbreviation b.bible.abbreviation
     json.path bible_path(b.bible.uuid, format: :json)
   end
-  json.testament do
-    json.uuid b.testament.uuid
-    json.path testament_path(b.testament.uuid, format: :json)
-  end
+  json.testament b.read_attribute(:testament)
 end

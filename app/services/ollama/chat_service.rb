@@ -36,7 +36,7 @@ module Ollama
     # are the resulting Hash/Array and +structured_output+ is true. If the model returns prose (refusals, etc.),
     # +output+ stays the string, +raw+ is unchanged, and +structured_output+ is false (still HTTP 200).
     def chat_with_system(system_message:, user_content:, model: nil, parse_json_output: false, ollama_format: nil,
-                         ollama_options: nil, json_retry_on_prose: false)
+                         ollama_options: nil)
       messages = [
         { role: 'system', content: system_message },
         { role: 'user', content: user_content }
@@ -57,24 +57,7 @@ module Ollama
       }
       return result unless parse_json_output
 
-      parsed = parse_json_chat_result(response)
-      if json_retry_on_prose && parsed[:structured_output] == false
-        retry_system = "#{system_message}\n\n#{Prompts::Comparator.retry_enforcement_suffix}"
-        response2 = @client.chat(
-          model: model,
-          messages: [
-            { role: 'system', content: retry_system },
-            { role: 'user', content: user_content }
-          ],
-          format: ollama_format,
-          options: ollama_options
-        )
-        return response2 if self.class.response_error?(response2)
-
-        parsed = parse_json_chat_result(response2)
-      end
-
-      parsed
+      parse_json_chat_result(response)
     end
 
     # Streaming chat; yields accumulated text via on_delta for each Ollama chunk.

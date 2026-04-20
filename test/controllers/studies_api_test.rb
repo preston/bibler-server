@@ -107,7 +107,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         title: 'Opening',
         item_type: 'custom',
         notes: 'Welcome everyone',
-        metadata: { anchor: 'intro' }
+        anchor: 'intro'
       }
     }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
     assert_response :created
@@ -213,8 +213,8 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
 
   test 'includes total_duration_minutes in studies index and excludes zero durations' do
     study = studies(:one)
-    StudyPlanItem.create!(study: study, title: 'A', item_type: 'verse', notes: '', metadata: {}, position: 900, duration: 3)
-    StudyPlanItem.create!(study: study, title: 'B', item_type: 'task', notes: '', metadata: {}, position: 901, duration: 0)
+    StudyPlanItem.create!(study: study, title: 'A', item_type: 'verse', notes: '', position: 900, duration: 3)
+    StudyPlanItem.create!(study: study, title: 'B', item_type: 'task', notes: '', position: 901, duration: 0)
 
     get '/studies.json', params: { scope: 'owned' }, headers: @auth_one
     assert_response :success
@@ -223,16 +223,14 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     assert_equal 3, row['total_duration_minutes']
   end
 
-  test 'strips selected_bible_uuids from study metadata on update' do
-    uuids = Bible.limit(2).pluck(:uuid)
+  test 'ignores deprecated study metadata payload on update' do
     patch "/studies/#{@study.uuid}.json", params: {
       mode: 'leader',
-      study: { metadata: { selected_bible_uuids: uuids, keep_me: 'yes' } }
+      study: { metadata: { selected_bible_uuids: ['x'], keep_me: 'yes' }, title: 'Metadata Ignored' }
     }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
     assert_response :success
 
     @study.reload
-    assert_equal 'yes', @study.metadata['keep_me']
-    refute @study.metadata.key?('selected_bible_uuids')
+    assert_equal 'Metadata Ignored', @study.title
   end
 end

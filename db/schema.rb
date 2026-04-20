@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
+ActiveRecord::Schema[8.1].define(version: 1) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "bibles", id: :serial, force: :cascade do |t|
+  create_table "bibles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "abbreviation", null: false
     t.boolean "ai_default_aramaic", default: false, null: false
     t.boolean "ai_default_english", default: false, null: false
@@ -25,43 +25,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.text "license", default: ""
     t.string "name", null: false
     t.datetime "updated_at", precision: nil, null: false
-    t.string "uuid", null: false
     t.index ["abbreviation"], name: "index_bibles_on_abbreviation", unique: true
     t.index ["ai_default_aramaic"], name: "idx_bibles_ai_default_aramaic_true", unique: true, where: "ai_default_aramaic"
     t.index ["ai_default_english"], name: "idx_bibles_ai_default_english_true", unique: true, where: "ai_default_english"
     t.index ["ai_default_greek"], name: "idx_bibles_ai_default_greek_true", unique: true, where: "ai_default_greek"
     t.index ["ai_default_hebrew_ot"], name: "idx_bibles_ai_default_hebrew_true", unique: true, where: "ai_default_hebrew_ot"
     t.index ["name", "language"], name: "index_bibles_on_name_and_language", unique: true
-    t.index ["uuid"], name: "index_bibles_on_uuid", unique: true
   end
 
-  create_table "books", id: :serial, force: :cascade do |t|
-    t.bigint "bible_id", null: false
+  create_table "books", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "bible_id", null: false
     t.datetime "created_at", precision: nil, null: false
     t.string "name", null: false
     t.integer "ordinal", null: false
-    t.integer "testament_id", null: false
+    t.string "testament", null: false
     t.datetime "updated_at", precision: nil, null: false
-    t.string "uuid", null: false
     t.index ["bible_id", "name"], name: "index_books_on_bible_id_and_name", unique: true
+    t.index ["bible_id", "testament", "ordinal"], name: "index_books_on_bible_id_and_testament_and_ordinal"
     t.index ["bible_id"], name: "index_books_on_bible_id"
     t.index ["ordinal"], name: "index_books_on_ordinal"
-    t.index ["uuid"], name: "index_books_on_uuid", unique: true
+    t.check_constraint "testament::text = ANY (ARRAY['old'::character varying::text, 'new'::character varying::text, 'other'::character varying::text])", name: "check_books_testament_enum"
   end
 
-  create_table "mcp_sessions", force: :cascade do |t|
+  create_table "mcp_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "initialized_at", null: false
     t.datetime "last_activity_at", null: false
     t.string "last_event_id"
-    t.jsonb "metadata"
     t.string "session_id", null: false
     t.datetime "updated_at", null: false
     t.index ["last_activity_at"], name: "index_mcp_sessions_on_last_activity_at"
     t.index ["session_id"], name: "index_mcp_sessions_on_session_id", unique: true
   end
 
-  create_table "roles", force: :cascade do |t|
+  create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "access", default: false, null: false
     t.boolean "administrator", default: false, null: false
     t.boolean "bibles", default: false, null: false
@@ -73,105 +70,97 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.index ["name"], name: "index_roles_on_name", unique: true
   end
 
-  create_table "roles_users", id: false, force: :cascade do |t|
-    t.bigint "role_id", null: false
-    t.bigint "user_id", null: false
+  create_table "roles_users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "role_id", null: false
+    t.uuid "user_id", null: false
     t.index ["role_id"], name: "index_roles_users_on_role_id"
     t.index ["user_id", "role_id"], name: "index_roles_users_on_user_id_and_role_id", unique: true
     t.index ["user_id"], name: "index_roles_users_on_user_id"
   end
 
-  create_table "studies", force: :cascade do |t|
+  create_table "studies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "goal"
-    t.jsonb "metadata", default: {}, null: false
-    t.bigint "owner_id"
+    t.uuid "owner_id"
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.string "visibility", default: "private", null: false
     t.index ["owner_id"], name: "index_studies_on_owner_id"
-    t.index ["uuid"], name: "index_studies_on_uuid", unique: true
   end
 
-  create_table "study_answers", force: :cascade do |t|
+  create_table "study_answers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "author_label"
     t.datetime "created_at", null: false
     t.text "response", null: false
-    t.bigint "study_commentary_id"
-    t.bigint "study_id", null: false
-    t.bigint "study_question_id", null: false
+    t.uuid "study_commentary_id"
+    t.uuid "study_id", null: false
+    t.uuid "study_question_id", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
-    t.string "uuid", null: false
+    t.uuid "user_id"
     t.string "visibility", default: "study", null: false
     t.index ["study_commentary_id"], name: "index_study_answers_on_study_commentary_id"
     t.index ["study_id"], name: "index_study_answers_on_study_id"
     t.index ["study_question_id", "created_at"], name: "index_study_answers_on_study_question_id_and_created_at"
     t.index ["study_question_id"], name: "index_study_answers_on_study_question_id"
     t.index ["user_id"], name: "index_study_answers_on_user_id"
-    t.index ["uuid"], name: "index_study_answers_on_uuid", unique: true
   end
 
-  create_table "study_commentaries", force: :cascade do |t|
+  create_table "study_commentaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "body"
     t.jsonb "context", default: {}, null: false
     t.datetime "created_at", null: false
     t.integer "position", default: 0, null: false
     t.text "prompt"
     t.string "source_type", default: "manual", null: false
-    t.bigint "study_id", null: false
+    t.uuid "study_id", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.index ["study_id", "position"], name: "index_study_commentaries_on_study_id_and_position"
     t.index ["study_id"], name: "index_study_commentaries_on_study_id"
-    t.index ["uuid"], name: "index_study_commentaries_on_uuid", unique: true
   end
 
-  create_table "study_plan_item_user_states", force: :cascade do |t|
+  create_table "study_plan_item_user_states", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "status", default: "todo", null: false
-    t.bigint "study_plan_item_id", null: false
+    t.uuid "study_plan_item_id", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
+    t.uuid "user_id", null: false
     t.index ["study_plan_item_id"], name: "index_study_plan_item_user_states_on_study_plan_item_id"
     t.index ["user_id", "study_plan_item_id"], name: "idx_plan_item_user_state_unique", unique: true
     t.index ["user_id"], name: "index_study_plan_item_user_states_on_user_id"
   end
 
-  create_table "study_plan_items", force: :cascade do |t|
+  create_table "study_plan_items", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "anchor"
     t.datetime "created_at", null: false
     t.integer "duration"
     t.string "item_type", null: false
-    t.jsonb "metadata", default: {}, null: false
     t.text "notes"
     t.integer "position", default: 0, null: false
-    t.bigint "study_id", null: false
+    t.string "resource_type"
+    t.string "resource_uuid"
+    t.uuid "study_id", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.index ["study_id", "position"], name: "index_study_plan_items_on_study_id_and_position"
+    t.index ["study_id", "resource_type", "resource_uuid"], name: "index_plan_items_on_study_and_resource"
     t.index ["study_id"], name: "index_study_plan_items_on_study_id"
-    t.index ["uuid"], name: "index_study_plan_items_on_uuid", unique: true
   end
 
-  create_table "study_questions", force: :cascade do |t|
+  create_table "study_questions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "guidance_notes"
     t.integer "position", default: 0, null: false
     t.text "prompt", null: false
     t.string "question_type", default: "discussion", null: false
-    t.bigint "study_id", null: false
+    t.uuid "study_id", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.jsonb "verse_anchor", default: {}, null: false
     t.index ["study_id", "position"], name: "index_study_questions_on_study_id_and_position"
     t.index ["study_id"], name: "index_study_questions_on_study_id"
-    t.index ["uuid"], name: "index_study_questions_on_uuid", unique: true
   end
 
-  create_table "study_tasks", force: :cascade do |t|
+  create_table "study_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "assignee_label"
     t.jsonb "context", default: {}, null: false
     t.datetime "created_at", null: false
@@ -179,16 +168,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.text "instruction", null: false
     t.integer "position", default: 0, null: false
     t.string "status", default: "open", null: false
-    t.bigint "study_id", null: false
+    t.uuid "study_id", null: false
     t.string "task_type", default: "discussion", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.index ["study_id", "position"], name: "index_study_tasks_on_study_id_and_position"
     t.index ["study_id"], name: "index_study_tasks_on_study_id"
-    t.index ["uuid"], name: "index_study_tasks_on_uuid", unique: true
   end
 
-  create_table "study_verses", force: :cascade do |t|
+  create_table "study_verses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "bible_uuid", null: false
     t.string "book_uuid", null: false
     t.integer "chapter", null: false
@@ -196,9 +183,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.text "note"
     t.integer "ordinal", null: false
     t.integer "position", default: 0, null: false
-    t.bigint "study_id", null: false
+    t.uuid "study_id", null: false
     t.datetime "updated_at", null: false
-    t.string "uuid", null: false
     t.text "verse_text"
     t.string "verse_uuid"
     t.index ["bible_uuid"], name: "index_study_verses_on_bible_uuid"
@@ -206,20 +192,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.index ["study_id", "bible_uuid", "book_uuid", "chapter", "ordinal"], name: "idx_study_verses_lookup_uuid"
     t.index ["study_id", "position"], name: "index_study_verses_on_study_id_and_position"
     t.index ["study_id"], name: "index_study_verses_on_study_id"
-    t.index ["uuid"], name: "index_study_verses_on_uuid", unique: true
     t.index ["verse_uuid"], name: "index_study_verses_on_verse_uuid"
   end
 
-  create_table "testaments", id: :serial, force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.string "name", null: false
-    t.datetime "updated_at", precision: nil, null: false
-    t.string "uuid", null: false
-    t.index ["name"], name: "index_testaments_on_name", unique: true
-    t.index ["uuid"], name: "index_testaments_on_uuid", unique: true
-  end
-
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "api_token"
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -236,21 +212,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
-  create_table "verses", id: :serial, force: :cascade do |t|
-    t.integer "bible_id", null: false
-    t.integer "book_id", null: false
+  create_table "verses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "bible_id", null: false
+    t.uuid "book_id", null: false
     t.integer "chapter", null: false
     t.datetime "created_at", precision: nil, null: false
     t.integer "ordinal", null: false
     t.text "text", null: false
     t.datetime "updated_at", precision: nil, null: false
-    t.string "uuid", null: false
     t.index "to_tsvector('simple'::regconfig, COALESCE(text, ''::text))", name: "verses_gin_text", using: :gin
-    t.index ["uuid"], name: "index_verses_on_uuid", unique: true
+    t.index ["bible_id", "book_id", "chapter", "ordinal"], name: "index_verses_on_bible_book_chapter_ordinal", unique: true
   end
 
   add_foreign_key "books", "bibles"
-  add_foreign_key "books", "testaments"
   add_foreign_key "roles_users", "roles"
   add_foreign_key "roles_users", "users"
   add_foreign_key "studies", "users", column: "owner_id"

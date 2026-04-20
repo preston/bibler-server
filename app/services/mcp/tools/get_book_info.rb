@@ -47,7 +47,7 @@ module Mcp
                   uuid: book.uuid,
                   name: book.name,
                   ordinal: book.ordinal,
-                  testament: book.testament.name,
+                  testament: book.read_attribute(:testament),
                   bible: {
                     uuid: bible.uuid,
                     name: bible.name,

@@ -8,7 +8,7 @@ module StudyResourceHelpers
   end
 
   def find_study_resource!(scope, key:, error_message:)
-    record = scope.find_by(uuid: key) || scope.find_by(id: key)
+    record = scope.find_by(id: key)
     return record if record
 
     render json: { error: error_message }, status: :not_found

@@ -40,7 +40,7 @@ class StudyQuestionsController < ApplicationController
   def reorder
     ids = Array(params[:ordered_uuids])
     ids.each_with_index do |uuid, position|
-      question = @study.study_questions.find_by(uuid:)
+      question = @study.study_questions.find_by(id: uuid)
       question&.update(position:)
     end
     @study_questions = @study.study_questions.ordered

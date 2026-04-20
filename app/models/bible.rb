@@ -2,18 +2,17 @@
 
 # Author: Preston Lee
 class Bible < ApplicationRecord
+  include UuidPrimaryKeyAsUuid
+
   has_many :verses, dependent: :destroy
   has_many :books, dependent: :destroy
-  before_validation :ensure_uuid
 
   validates_presence_of :name
   validates_presence_of :abbreviation
-  validates_presence_of :uuid
   validates_presence_of :language
 
   validates_uniqueness_of :name, scope: :language
   validates_uniqueness_of :abbreviation
-  validates_uniqueness_of :uuid
   validates_uniqueness_of :ai_default_english, if: :ai_default_english?
   validates_uniqueness_of :ai_default_hebrew_ot, if: :ai_default_hebrew_ot?
   validates_uniqueness_of :ai_default_greek, if: :ai_default_greek?
@@ -115,9 +114,4 @@ class Bible < ApplicationRecord
     where(language: codes).order(:id).first
   end
 
-  private
-
-  def ensure_uuid
-    self.uuid ||= SecureRandom.uuid
-  end
 end

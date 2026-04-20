@@ -15,7 +15,7 @@ unless Dir.exist?(base_path)
   exit 1
 end
 
-# Bootstrap testaments, bibles, and books
+# Bootstrap bibles (metadata from manifest)
 bootstrap!(base_path)
 
 # Load translation manifest
@@ -64,12 +64,12 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
 
   # Create books for this bible
   book_cache = {}
-  total_books = book_names_in_order.length
+  book_lookup_cache = {}
   book_names_in_order.each_with_index do |book_name, index|
     position = index + 1
-    # Normalize book name for testament determination, but keep original for storage
-    normalized_name = normalize_book_name(book_name)
-    testament = determine_testament(normalized_name, position, total_books)
+    # Classify from lookup key; preserve source book names exactly.
+    lookup_key = book_lookup_key(book_name)
+    testament = classify_book_testament(lookup_key)
 
     book = Book.find_or_create_by(bible:, name: book_name) do |b|
       b.testament = testament
@@ -84,6 +84,7 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
     end
 
     book_cache[book_name] = book
+    book_lookup_cache[lookup_key] ||= book
   end
 
   # Second pass: import verses
@@ -101,23 +102,26 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
 
       next unless book_name && chapter.positive? && verse_ordinal.positive? && text
 
-      book = book_cache[book_name]
+      book = book_cache[book_name] || book_lookup_cache[book_lookup_key(book_name)]
       next unless book
 
       verse_records << {
+        id: SecureRandom.uuid,
         bible_id: bible.id,
         book_id: book.id,
         chapter:,
         ordinal: verse_ordinal,
         text:,
-        uuid: SecureRandom.uuid,
         created_at: Time.current,
         updated_at: Time.current
       }
 
       # Batch inserts for better performance
       if verse_records.length >= 1000
-        Verse.insert_all(verse_records)
+        Verse.upsert_all(
+          verse_records,
+          unique_by: :index_verses_on_bible_book_chapter_ordinal
+        )
         count += verse_records.length
         verse_records = []
       end
@@ -125,7 +129,10 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
 
     # Insert remaining records
     if verse_records.any?
-      Verse.insert_all(verse_records)
+      Verse.upsert_all(
+        verse_records,
+        unique_by: :index_verses_on_bible_book_chapter_ordinal
+      )
       count += verse_records.length
     end
   else
@@ -138,8 +145,8 @@ Dir.glob(File.join(csv_dir, '*.csv')).sort.each do |csv_file|
 
       next unless book_name && chapter.positive? && verse_ordinal.positive? && text
 
-      # Use exact book name from CSV to look up in cache
-      book = book_cache[book_name]
+      # Use exact source name first, then fallback lookup key for matching only.
+      book = book_cache[book_name] || book_lookup_cache[book_lookup_key(book_name)]
       unless book
         puts "\nWarning: Book '#{book_name}' not found in cache, skipping verse..."
         next

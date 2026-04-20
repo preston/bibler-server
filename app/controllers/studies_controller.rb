@@ -96,7 +96,7 @@ class StudiesController < ApplicationController
   end
 
   def set_study
-    @study = Study.includes(:owner).find_by(uuid: params[:uuid])
+    @study = Study.includes(:owner).find_by(id: params[:uuid])
     return if @study
 
     render json: { error: 'Study not found.' }, status: :not_found
@@ -118,25 +118,7 @@ class StudiesController < ApplicationController
   end
 
   def study_params
-    permitted = params.require(:study).permit(:title, :goal, :visibility)
-    if params[:study].key?(:metadata)
-      raw = params[:study][:metadata]
-      incoming = case raw
-                 when ActionController::Parameters
-                   raw.permit!.to_unsafe_h
-                 when Hash
-                   raw
-                 else
-                   {}
-                 end
-      incoming = incoming.deep_stringify_keys
-      base = @study&.persisted? && @study.metadata.is_a?(Hash) ? @study.metadata.deep_stringify_keys : {}
-      merged = base.merge(incoming)
-      merged.delete('ai_system_prompt')
-      merged.delete('selected_bible_uuids')
-      permitted[:metadata] = merged
-    end
-    permitted
+    params.require(:study).permit(:title, :goal, :visibility)
   end
 
   def study_total_duration_by_id(studies)

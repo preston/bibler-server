@@ -36,7 +36,7 @@ class StudyVersesController < ApplicationController
   private
 
   def set_study_verse
-    @study_verse = @study.study_verses.find_by(uuid: params[:uuid])
+    @study_verse = @study.study_verses.find_by(id: params[:uuid])
     return if @study_verse
 
     render json: { error: 'Study verse not found.' }, status: :not_found

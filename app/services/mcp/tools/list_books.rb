@@ -30,9 +30,9 @@ module Mcp
       def execute(arguments)
         if arguments['bible'].present?
           bible = find_bible(arguments['bible'])
-          books = bible.books.includes(:testament).order('testament_id ASC', 'ordinal ASC')
+          books = bible.books.merge(Book.ordered_for_display)
         else
-          books = Book.includes(:bible, :testament).order('bible_id ASC', 'testament_id ASC', 'ordinal ASC')
+          books = Book.includes(:bible).merge(Book.ordered_with_bible)
         end
 
         {
@@ -45,7 +45,7 @@ module Mcp
                     uuid: book.uuid,
                     name: book.name,
                     ordinal: book.ordinal,
-                    testament: book.testament.name,
+                    testament: book.read_attribute(:testament),
                     bible: book.bible.name
                   }
                 end

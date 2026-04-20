@@ -89,7 +89,7 @@ module Ollama
 
     test 'normalizes optional duration from suggestion or payload' do
       round_b = '{"suggestions":[' \
-        '{"id":"a","type":"add_task","title":"task","summary":"s","duration":"9","payload":{}},' \
+        '{"id":"a","type":"add_task","title":"task","summary":"s","duration":"9","payload":{"task_type":"discussion"}},' \
         '{"id":"b","type":"add_question","title":"q","summary":"s","payload":{"duration":"0"}},' \
         '{"id":"c","type":"add_commentary","title":"c","summary":"s","duration":"-2","payload":{}}' \
         ']}'
@@ -145,8 +145,8 @@ module Ollama
       assert_equal 'add_question', result[:suggestions][0]['type']
     end
 
-    test 'round b prefers non-empty suggestions over empty top-level array when both present' do
-      round_b = '{"suggestions":[],"output":{"suggestions":[{"id":"c1","type":"add_task","title":"Break","summary":"Rest.","payload":{"instruction":"Pause","task_type":"reflection"}}]}}'
+    test 'round b accepts single output wrapper for suggestions' do
+      round_b = '{"output":{"suggestions":[{"id":"c1","type":"add_task","title":"Task","summary":"Rest.","payload":{"instruction":"Pause","task_type":"reflection"}}]}}'
       orch = StudyAssistantOrchestrator.new(
         study: studies(:one),
         user_message: 'help me study',
@@ -158,7 +158,7 @@ module Ollama
       assert_equal 'add_task', result[:suggestions][0]['type']
     end
 
-    test 'round b coerces break type to add_task' do
+    test 'round b drops unknown suggestion types' do
       round_b = '{"suggestions":[{"id":"d1","type":"break","title":"Pause","summary":"Five minutes.","payload":{"instruction":"Break","task_type":"reflection"}}]}'
       orch = StudyAssistantOrchestrator.new(
         study: studies(:one),
@@ -167,12 +167,11 @@ module Ollama
       )
       result = orch.call
       assert_nil result[:error]
-      assert_equal 1, result[:suggestions].size
-      assert_equal 'add_task', result[:suggestions][0]['type']
+      assert_equal 0, result[:suggestions].size
     end
 
-    test 'round b coerces create type to add_task' do
-      round_b = '{"suggestions":[{"id":"c-create","type":"create","title":"Create response","summary":"Create something tangible.","payload":{"instruction":"Draft a response","task_type":"create"}}]}'
+    test 'round b rejects add_task payloads with invalid enums' do
+      round_b = '{"suggestions":[{"id":"task-enum","type":"add_task","title":"Do work","summary":"S","payload":{"instruction":"Do work","task_type":"planning","status":"working"}}]}'
       orch = StudyAssistantOrchestrator.new(
         study: studies(:one),
         user_message: 'help me study',
@@ -180,12 +179,11 @@ module Ollama
       )
       result = orch.call
       assert_nil result[:error]
-      assert_equal 1, result[:suggestions].size
-      assert_equal 'add_task', result[:suggestions][0]['type']
+      assert_equal 0, result[:suggestions].size
     end
 
-    test 'round b normalizes add_task payload task_type and status to valid enums' do
-      round_b = '{"suggestions":[{"id":"task-enum","type":"add_task","title":"Do work","summary":"S","payload":{"instruction":"Do work","task_type":"planning","status":"working"}}]}'
+    test 'round b keeps add_task payload task_type and status when valid' do
+      round_b = '{"suggestions":[{"id":"task-enum","type":"add_task","title":"Do work","summary":"S","payload":{"instruction":"Do work","task_type":"discussion","status":"open"}}]}'
       orch = StudyAssistantOrchestrator.new(
         study: studies(:one),
         user_message: 'help me study',
@@ -197,18 +195,6 @@ module Ollama
       payload = result[:suggestions][0]['payload']
       assert_equal 'discussion', payload['task_type']
       assert_equal 'open', payload['status']
-    end
-
-    test 'round b maps writing task_type to create' do
-      round_b = '{"suggestions":[{"id":"task-writing","type":"add_task","title":"Write","summary":"S","payload":{"instruction":"Write","task_type":"writing"}}]}'
-      orch = StudyAssistantOrchestrator.new(
-        study: studies(:one),
-        user_message: 'help me study',
-        chat_service: FakeChat.new(['{"searches":[]}', round_b])
-      )
-      result = orch.call
-      assert_nil result[:error]
-      assert_equal 'create', result[:suggestions][0]['payload']['task_type']
     end
 
     test 'round b parses double-encoded JSON string payload' do

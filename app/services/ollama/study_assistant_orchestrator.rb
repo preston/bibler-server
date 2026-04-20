@@ -6,11 +6,6 @@ module Ollama
     MAX_SEARCH_ITEMS = 20
     SUGGESTION_TYPES = %w[add_verse add_commentary add_question add_task add_worship].freeze
 
-    # LLM envelopes / alternate keys for the suggestions array (Round 2).
-    SUGGESTION_JSON_WRAPPER_KEYS = %w[data output response result message body content].freeze
-    SUGGESTION_CONTAINER_KEYS = %w[suggestions suggestion items results].freeze
-    MAX_SUGGESTION_EXTRACT_DEPTH = 8
-
     # Words unlikely to help lexical Bible search or too generic at high limits
     FALLBACK_STOP_WORDS = %w[
       that this with from have been were they will your what when shall unto thee thou which about their there
@@ -172,7 +167,7 @@ module Ollama
       errors = Array(search_result[:errors]).map(&:to_s)
       by_uuid = verses.group_by { |v| v[:bible_uuid].to_s }
       by_bible = by_uuid.map do |uuid, rows|
-        name = Bible.find_by(uuid: uuid)&.name
+        name = Bible.find_by(id: uuid)&.name
         { bible_uuid: uuid, bible_name: name, count: rows.size }
       end
       {
@@ -183,10 +178,8 @@ module Ollama
     end
 
     def build_study_snapshot
-      meta = @study.metadata.is_a?(Hash) ? Ollama::Prompts::Context.normalize(@study.metadata) : {}
       {
         study: @study.slice(:uuid, :title, :goal, :visibility).merge(
-          metadata: meta,
           plan_total_duration_minutes: plan_items_total_duration_minutes
         ),
         verses: @study.study_verses.ordered.includes(:verse).map { |sv| study_verse_snapshot_hash(sv) },
@@ -359,107 +352,32 @@ module Ollama
       end
     end
 
-    # Models often return a bare JSON array, alternate keys, or wrap JSON in output/response; normalize before {normalize_suggestions}.
-    def extract_suggestions_list_from_parsed(parsed, depth: 0)
-      if depth > MAX_SUGGESTION_EXTRACT_DEPTH
-        Rails.logger.warn('[StudyAssistant] round_b suggestions extract exceeded max depth')
-        return []
-      end
-
+    # Strict extraction for round-b suggestions. Accepted roots:
+    # - { "suggestions": [ ... ] }
+    # - { "output": { "suggestions": [ ... ] } } (single legacy wrapper)
+    # - [ { ...suggestion... }, ... ]
+    def extract_suggestions_list_from_parsed(parsed)
       case parsed
-      when String
-        inner = ResponseJson.parse_object(parsed)
-        return inner ? extract_suggestions_list_from_parsed(inner, depth: depth + 1) : []
       when Array
-        hashes = parsed.select { |x| x.is_a?(Hash) }
-        return hashes if hashes.any?
-
-        Rails.logger.warn('[StudyAssistant] round_b JSON root array had no objects; dropping')
-        []
+        parsed.select { |x| x.is_a?(Hash) }
       when Hash
-        # Prefer a non-empty list at this level so we do not stop on {"suggestions":[],"output":{...}}.
-        SUGGESTION_CONTAINER_KEYS.each do |key|
-          v = hash_fetch_ci(parsed, key)
-          next if v.nil?
+        direct = parsed['suggestions'] || parsed[:suggestions]
+        return direct if direct.is_a?(Array)
 
-          wrapped = wrap_suggestion_entries(v)
-          return wrapped if wrapped.any?
+        wrapped = parsed['output'] || parsed[:output]
+        if wrapped.is_a?(Hash)
+          nested = wrapped['suggestions'] || wrapped[:suggestions]
+          return nested if nested.is_a?(Array)
         end
 
-        nested = hash_fetch_ci(parsed, 'data')
-        if nested.is_a?(Hash)
-          sug = hash_fetch_ci(nested, 'suggestions')
-          return sug if sug.is_a?(Array) && sug.any?
-        end
-
-        SUGGESTION_JSON_WRAPPER_KEYS.each do |wk|
-          inner = hash_fetch_ci(parsed, wk)
-          case inner
-          when Hash, Array
-            got = extract_suggestions_list_from_parsed(inner, depth: depth + 1)
-            return got if got.any?
-          when String
-            parsed_inner = ResponseJson.parse_object(inner)
-            if parsed_inner
-              got = extract_suggestions_list_from_parsed(parsed_inner, depth: depth + 1)
-              return got if got.any?
-            end
-          end
-        end
-
-        SUGGESTION_CONTAINER_KEYS.each do |key|
-          v = hash_fetch_ci(parsed, key)
-          next if v.nil?
-
-          wrapped = wrap_suggestion_entries(v)
-          return wrapped if v.is_a?(Array)
-        end
-
-        nested2 = hash_fetch_ci(parsed, 'data')
-        if nested2.is_a?(Hash)
-          sug2 = hash_fetch_ci(nested2, 'suggestions')
-          return sug2 if sug2.is_a?(Array)
-        end
-
-        d = hash_fetch_ci(parsed, 'data')
-        return wrap_suggestion_entries(d) if d.is_a?(Array)
-
-        if hash_fetch_ci(parsed, 'type').present?
-          sh = parsed.stringify_keys
-          t = coerce_suggestion_type(sh['type'])
-          return [sh] if SUGGESTION_TYPES.include?(t)
+        if parsed['type'].present? || parsed[:type].present?
+          return [parsed]
         end
 
         Rails.logger.warn("[StudyAssistant] round_b JSON had no suggestions array; keys=#{parsed.keys.inspect}")
         []
-      when nil
-        []
       else
         Rails.logger.warn("[StudyAssistant] round_b unexpected parsed type #{parsed.class}")
-        []
-      end
-    end
-
-    def hash_fetch_ci(h, name)
-      return nil unless h.is_a?(Hash)
-
-      [name.to_s, name.to_sym].each do |k|
-        return h[k] if h.key?(k)
-      end
-      want = name.to_s.downcase
-      h.each do |k, v|
-        next unless k.is_a?(String) || k.is_a?(Symbol)
-
-        return v if k.to_s.casecmp(want).zero?
-      end
-      nil
-    end
-
-    def wrap_suggestion_entries(v)
-      case v
-      when Array then v
-      when Hash then [v]
-      else
         []
       end
     end
@@ -468,24 +386,9 @@ module Ollama
       raw.to_s.strip.downcase.tr('-', '_').gsub(/\s+/, '_')
     end
 
-    # Map common model mistakes (e.g. "break" for a rest segment) onto allowed SUGGESTION_TYPES.
-    def coerce_suggestion_type(raw)
+    def normalize_suggestion_type(raw)
       t = normalize_suggestion_type_token(raw)
-      return t if SUGGESTION_TYPES.include?(t)
-
-      case t
-      when 'break', 'rest', 'pause', 'intermission', 'add_break', 'coffee_break', 'stretch_break' then 'add_task'
-      when 'discussion', 'discuss', 'add_discussion' then 'add_question'
-      when 'verse', 'scripture', 'bible_verse', 'passage' then 'add_verse'
-      when 'reading' then 'add_task'
-      when 'commentary', 'comment', 'notes', 'reflection' then 'add_commentary'
-      when 'task', 'activity', 'add_activity' then 'add_task'
-      when 'create', 'creative', 'add_create_step', 'create_step' then 'add_task'
-      when 'question', 'prompt' then 'add_question'
-      when 'worship', 'song', 'music', 'hymn' then 'add_worship'
-      when 'prayer' then 'add_task'
-      else t
-      end
+      SUGGESTION_TYPES.include?(t) ? t : nil
     end
 
     def normalize_suggestions(list)
@@ -498,13 +401,14 @@ module Ollama
         next unless item.is_a?(Hash)
 
         h = item.stringify_keys
-        type = coerce_suggestion_type(h['type'])
-        next unless SUGGESTION_TYPES.include?(type)
+        type = normalize_suggestion_type(h['type'])
+        next if type.nil?
 
         payload = h['payload']
         payload = payload.is_a?(Hash) ? payload.stringify_keys : {}
         payload = enrich_add_verse_payload(payload) if type == 'add_verse'
         payload = normalize_add_task_payload(payload) if type == 'add_task'
+        next if type == 'add_task' && payload.nil?
 
         out << {
           'order' => out.length,
@@ -525,20 +429,12 @@ module Ollama
     def normalize_add_task_payload(payload)
       p = payload.stringify_keys
       normalized_type = normalize_suggestion_type_token(p['task_type'])
-      type_aliases = {
-        'plan' => 'discussion',
-        'planning' => 'discussion',
-        'write' => 'create',
-        'writing' => 'create',
-        'journal' => 'reflection',
-        'journaling' => 'reflection',
-        'meditation' => 'reflection'
-      }
-      normalized_type = type_aliases[normalized_type] || normalized_type
-      p['task_type'] = StudyTask::TASK_TYPES.include?(normalized_type) ? normalized_type : 'discussion'
+      return nil unless StudyTask::TASK_TYPES.include?(normalized_type)
+      p['task_type'] = normalized_type
 
       normalized_status = normalize_suggestion_type_token(p['status'])
-      p['status'] = StudyTask::STATUSES.include?(normalized_status) ? normalized_status : 'open'
+      return nil if p['status'].present? && !StudyTask::STATUSES.include?(normalized_status)
+      p['status'] = normalized_status if normalized_status.present?
       p
     end
 
@@ -568,10 +464,11 @@ module Ollama
     def enrich_add_verse_payload(payload)
       p = payload.stringify_keys
       vu = p['verse_uuid'].to_s.strip.presence
-      v = vu ? Verse.includes(:bible, :book).find_by(uuid: vu) : nil
+      v = vu ? Verse.includes(:bible, :book).find_by(id: vu) : nil
       if v.nil? && p['bible_uuid'].present? && p['book_uuid'].present?
-        bible = Bible.find_by(uuid: p['bible_uuid'])
-        book = Book.find_by(uuid: p['book_uuid'])
+        bible = Bible.find_by(id: p['bible_uuid'])
+        # Scope book to this Bible — book UUIDs must not be resolved globally across translations.
+        book = bible&.books&.find_by(id: p['book_uuid'])
         if bible && book
           ch = p['chapter'].to_i
           ord = p['ordinal'].to_i

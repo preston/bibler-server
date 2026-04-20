@@ -28,7 +28,7 @@ class VersesController < ApplicationController
   def search
     t = params[:text]
     # puts "Searching for '#{t}'.."
-    bible = Bible.find_by!(uuid: params[:bible])
+    bible = Bible.find_by!(id: params[:bible])
     @verses = Verse.limit(SEARCH_LIMIT).where(bible:).search_by_text(t).includes(:book)
     render json: @verses, include: :book
   end
@@ -36,7 +36,7 @@ class VersesController < ApplicationController
   private
 
   def set_context
-    @bible = Bible.find_by!(uuid: params[:bible])
-    @book = @bible.books.find_by!(uuid: params[:book])
+    @bible = Bible.find_by!(id: params[:bible])
+    @book = @bible.books.find_by!(id: params[:book])
   end
 end

@@ -4,7 +4,7 @@ module System
   class SettingsController < ApplicationController
     SORTABLE_COLUMNS = {
       'name' => 'name',
-      'uuid' => 'uuid',
+      'uuid' => 'id',
       'language' => 'language',
       'abbreviation' => 'abbreviation',
       'updated_at' => 'updated_at'
@@ -16,7 +16,12 @@ module System
       authorize! :read, :system_ai_settings
       scoped = Bible.all
       q = params[:q].to_s.strip
-      scoped = scoped.where('name ILIKE :q OR uuid ILIKE :q OR abbreviation ILIKE :q OR language ILIKE :q', q: "%#{q}%") if q.present?
+      if q.present?
+        scoped = scoped.where(
+          'name ILIKE :q OR CAST(id AS text) ILIKE :q OR abbreviation ILIKE :q OR language ILIKE :q',
+          q: "%#{q}%"
+        )
+      end
 
       sort_col = SORTABLE_COLUMNS.fetch(params[:sort].to_s, 'name')
       dir = normalized_direction
@@ -58,7 +63,7 @@ module System
           h = row.is_a?(ActionController::Parameters) ? row.to_unsafe_h : row
           next unless h.is_a?(Hash)
 
-          bible = Bible.find_by(uuid: h['uuid'].to_s)
+          bible = Bible.find_by(id: h['uuid'].to_s)
           next unless bible
 
           bible.update!(

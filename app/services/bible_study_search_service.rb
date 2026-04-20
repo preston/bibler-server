@@ -58,7 +58,7 @@ class BibleStudySearchService
   def self.resolve_bible(uuid)
     return if uuid.blank?
 
-    Bible.find_by(uuid: uuid.to_s)
+    Bible.find_by(id: uuid.to_s)
   end
 
   def self.normalize_search_text(raw)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 test1:
-  uuid: 00000000-0000-0000-0000-000000000101
+  id: 00000000-0000-0000-0000-000000000101
   name: Test Bible 1
   abbreviation: TEST1
   language: en
@@ -9,7 +9,7 @@ test1:
   ai_default_english: true
 
 test_hebrew_ot:
-  uuid: 00000000-0000-0000-0000-000000000103
+  id: 00000000-0000-0000-0000-000000000103
   name: Test Hebrew OT
   abbreviation: HTEST
   language: hbo
@@ -17,7 +17,7 @@ test_hebrew_ot:
   ai_default_hebrew_ot: true
 
 test2:
-  uuid: 00000000-0000-0000-0000-000000000102
+  id: 00000000-0000-0000-0000-000000000102
   name: Test Bible 2
   abbreviation: TEST2
   language: en

@@ -8,7 +8,4 @@ json.bible do
   json.abbreviation @book.bible.abbreviation
   json.path bible_path(@book.bible.uuid, format: :json)
 end
-json.testament do
-  json.uuid @book.testament.uuid
-  json.path testament_path(@book.testament.uuid, format: :json)
-end
+json.testament @book.read_attribute(:testament)

@@ -22,8 +22,8 @@ class AiController < ApplicationController
 
   def comparator_commentary
     p = comparator_commentary_params
-    primary = Bible.find_by(uuid: p[:primary_bible_uuid].to_s)
-    secondary = Bible.find_by(uuid: p[:secondary_bible_uuid].to_s)
+    primary = Bible.find_by(id: p[:primary_bible_uuid].to_s)
+    secondary = Bible.find_by(id: p[:secondary_bible_uuid].to_s)
 
     unless primary && secondary
       render json: { error: 'Unknown primary or secondary Bible.' }, status: :unprocessable_entity
@@ -37,8 +37,8 @@ class AiController < ApplicationController
       return
     end
 
-    primary_book = primary.books.find_by(uuid: p[:primary_book_uuid].to_s)
-    secondary_book = secondary.books.find_by(uuid: p[:secondary_book_uuid].to_s)
+    primary_book = primary.books.find_by(id: p[:primary_book_uuid].to_s)
+    secondary_book = secondary.books.find_by(id: p[:secondary_book_uuid].to_s)
 
     unless primary_book && secondary_book
       render json: { error: 'Unknown primary or secondary book for the selected Bible.' }, status: :unprocessable_entity
@@ -70,7 +70,7 @@ class AiController < ApplicationController
     }
 
     result = comparator_llm_result(Ollama::ChatService.new, context)
-    render json: comparator_response_for_json_client(result), status: comparator_http_status(result)
+    render json: result, status: comparator_http_status(result)
   end
 
   private
@@ -121,8 +121,7 @@ class AiController < ApplicationController
       model: params[:model].presence,
       parse_json_output: true,
       ollama_format: ollama_format,
-      ollama_options: comparator_ollama_options,
-      json_retry_on_prose: ENV['BIBLER_SERVER_OLLAMA_COMPARATOR_JSON_RETRY'].to_s == 'true'
+      ollama_options: comparator_ollama_options
     )
   end
 
@@ -143,19 +142,4 @@ class AiController < ApplicationController
     { temperature: 0.15, num_predict: 16_384 }
   end
 
-  # ChatService may set +output+ and +raw['message']['content']+ to parsed Hashes. JSON clients (e.g. Angular)
-  # often treat +output+ as a string (e.g. +.indexOf+). Expose the same data as JSON text while keeping +structured_output+.
-  def comparator_response_for_json_client(result)
-    payload = result.deep_dup
-    out = payload[:output]
-    if out.is_a?(Hash)
-      payload[:output] = JSON.generate(out)
-    end
-    raw = payload[:raw]
-    if raw.is_a?(Hash) && raw['message'].is_a?(Hash)
-      mc = raw['message']['content']
-      raw['message']['content'] = mc.is_a?(Hash) ? JSON.generate(mc) : mc
-    end
-    payload
-  end
 end

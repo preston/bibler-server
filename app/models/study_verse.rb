@@ -3,13 +3,13 @@
 # Author: Preston Lee
 # A saved scripture reference (bible/book/chapter/ordinal) attached to a study.
 class StudyVerse < ApplicationRecord
-  belongs_to :study
-  belongs_to :verse, optional: true, primary_key: :uuid, foreign_key: :verse_uuid, inverse_of: false
+  include UuidPrimaryKeyAsUuid
 
-  before_validation :ensure_uuid
+  belongs_to :study
+  belongs_to :verse, optional: true, primary_key: :id, foreign_key: :verse_uuid, inverse_of: false
+
   before_validation :apply_reference_from_verse_uuid, if: -> { verse_uuid.present? }
 
-  validates :uuid, presence: true, uniqueness: true
   validates :bible_uuid, :book_uuid, presence: true
   validates :chapter, :ordinal, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :position, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -17,12 +17,8 @@ class StudyVerse < ApplicationRecord
 
   private
 
-  def ensure_uuid
-    self.uuid ||= SecureRandom.uuid
-  end
-
   def apply_reference_from_verse_uuid
-    v = Verse.includes(:bible, :book).find_by(uuid: verse_uuid.to_s.strip)
+    v = Verse.includes(:bible, :book).find_by(id: verse_uuid.to_s.strip)
     unless v
       errors.add(:verse_uuid, 'does not match a known verse')
       return

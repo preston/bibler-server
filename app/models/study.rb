@@ -2,6 +2,8 @@
 
 # Author: Preston Lee
 class Study < ApplicationRecord
+  include UuidPrimaryKeyAsUuid
+
   has_many :study_verses, dependent: :destroy
   has_many :study_commentaries, dependent: :destroy
   has_many :study_questions, dependent: :destroy
@@ -13,9 +15,6 @@ class Study < ApplicationRecord
   VISIBILITIES = %w[private sharable public].freeze
   MODES = %w[leader co-leader participant].freeze
 
-  before_validation :ensure_uuid
-
-  validates :uuid, presence: true, uniqueness: true
   validates :title, presence: true
   validates :visibility, presence: true, inclusion: { in: VISIBILITIES }
 
@@ -37,9 +36,4 @@ class Study < ApplicationRecord
     []
   end
 
-  private
-
-  def ensure_uuid
-    self.uuid ||= SecureRandom.uuid
-  end
 end

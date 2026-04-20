@@ -107,20 +107,32 @@ class StudyPlanItemsController < ApplicationController
   end
 
   def item_params
-    permitted = params.require(:study_plan_item).permit(:title, :item_type, :notes, :position, :duration)
-    if params[:study_plan_item]&.key?(:metadata)
-      raw = params[:study_plan_item][:metadata]
-      permitted[:metadata] = case raw
-                             when ActionController::Parameters then raw.permit!.to_h
-                             when Hash then raw
-                             else {}
-                             end
-    end
-    permitted
+    params.require(:study_plan_item).permit(
+      :title,
+      :item_type,
+      :notes,
+      :position,
+      :duration,
+      :anchor,
+      :resource_type,
+      :resource_uuid
+    )
   end
 
   def serialize_item(item, my_status: nil)
-    h = item.slice(:uuid, :title, :item_type, :notes, :position, :duration, :metadata, :created_at, :updated_at)
+    h = item.slice(
+      :uuid,
+      :title,
+      :item_type,
+      :notes,
+      :position,
+      :duration,
+      :anchor,
+      :resource_type,
+      :resource_uuid,
+      :created_at,
+      :updated_at
+    )
     h[:duration] = nil if item.effective_duration.nil?
     h[:my_status] = my_status unless my_status.nil?
     h

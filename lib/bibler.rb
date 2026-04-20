@@ -6,10 +6,37 @@ require 'set'
 module Bibler
   # Author: Preston Lee
   module Data
-    def create_testaments
-      Testament.find_or_create_by!(name: 'Old')
-      Testament.find_or_create_by!(name: 'New')
-    end
+    OT_BOOK_LOOKUP = %w[
+      genesis exodus leviticus numbers deuteronomy
+      joshua judges ruth 1\ samuel 2\ samuel
+      1\ kings 2\ kings 1\ chronicles 2\ chronicles
+      ezra nehemiah esther
+      job psalms proverbs ecclesiastes song\ of\ solomon
+      isaiah jeremiah lamentations ezekiel daniel
+      hosea joel amos obadiah jonah micah nahum
+      habakkuk zephaniah haggai zechariah malachi
+    ].freeze
+
+    NT_BOOK_LOOKUP = %w[
+      matthew mark luke john
+      acts
+      romans 1\ corinthians 2\ corinthians galatians ephesians
+      philippians colossians 1\ thessalonians 2\ thessalonians
+      1\ timothy 2\ timothy titus philemon
+      hebrews james 1\ peter 2\ peter 1\ john 2\ john 3\ john jude
+      revelation
+    ].freeze
+
+    APOCRYPHA_BOOK_LOOKUP = %w[
+      tobit judith wisdom sirach baruch
+      1\ maccabees 2\ maccabees 3\ maccabees 4\ maccabees
+      1\ esdras 2\ esdras
+      bel\ and\ the\ dragon susanna
+      prayer\ of\ azariah prayer\ of\ manasses
+      additions\ to\ esther
+      1\ enoch
+      odes
+    ].freeze
 
     def parse_translation_manifest(base_path)
       manifest_file = File.join(base_path, 'docs', 'main_readme', 'translation_list.md')
@@ -40,16 +67,35 @@ module Bibler
       ''
     end
 
-    def normalize_book_name(name)
-      # Convert Roman numerals to Arabic numerals
-      normalized = name.dup
-      # Handle common patterns: "I Chronicles" -> "1 Chronicles", "II Corinthians" -> "2 Corinthians", etc.
-      normalized.gsub!(/\bI\s+([A-Z])/, '1 \1')
-      normalized.gsub!(/\bII\s+([A-Z])/, '2 \1')
-      normalized.gsub!(/\bIII\s+([A-Z])/, '3 \1')
-      # Handle "Song of Solomon" vs "Song of Songs" - standardize to "Song of Solomon"
-      normalized.gsub!(/\bSong of Songs\b/, 'Song of Solomon')
-      normalized
+    # Lookup-only key for importer matching. Never persist this as a book name.
+    def self.book_lookup_key(name)
+      key = name.to_s.strip
+      key = key.gsub(/\bIII\s+/i, '3 ')
+      key = key.gsub(/\bII\s+/i, '2 ')
+      key = key.gsub(/\bI\s+/i, '1 ')
+      key.downcase
+    end
+
+    def book_lookup_key(name)
+      Bibler::Data.book_lookup_key(name)
+    end
+
+    # For logging when testament is +other+ (apocrypha list vs unrecognized name).
+    def self.other_testament_reason_for_book_name(name)
+      key = book_lookup_key(name)
+      return 'apocrypha' if APOCRYPHA_BOOK_LOOKUP.include?(key)
+
+      'unknown'
+    end
+
+    # Returns stored enum string: "old" | "new" | "other"
+    def classify_book_testament(lookup_key)
+      key = lookup_key.to_s.downcase.strip
+      return 'old' if OT_BOOK_LOOKUP.include?(key)
+      return 'new' if NT_BOOK_LOOKUP.include?(key)
+      return 'other' if APOCRYPHA_BOOK_LOOKUP.include?(key)
+
+      'other'
     end
 
     def create_bibles(base_path)
@@ -67,62 +113,7 @@ module Bibler
       end
     end
 
-    def determine_testament(book_name, position, total_books)
-      # Known OT books (standard 39 books)
-      ot_books = %w[
-        Genesis Exodus Leviticus Numbers Deuteronomy
-        Joshua Judges Ruth 1\ Samuel 2\ Samuel
-        1\ Kings 2\ Kings 1\ Chronicles 2\ Chronicles
-        Ezra Nehemiah Esther
-        Job Psalms Proverbs Ecclesiastes Song\ of\ Solomon
-        Isaiah Jeremiah Lamentations Ezekiel Daniel
-        Hosea Joel Amos Obadiah Jonah Micah Nahum
-        Habakkuk Zephaniah Haggai Zechariah Malachi
-      ]
-
-      # Known NT books (standard 27 books)
-      nt_books = %w[
-        Matthew Mark Luke John
-        Acts
-        Romans 1\ Corinthians 2\ Corinthians Galatians Ephesians
-        Philippians Colossians 1\ Thessalonians 2\ Thessalonians
-        1\ Timothy 2\ Timothy Titus Philemon
-        Hebrews James 1\ Peter 2\ Peter 1\ John 2\ John 3\ John Jude
-        Revelation
-      ]
-
-      # Check for known OT books
-      return Testament.find_by(name: 'Old') if ot_books.include?(book_name)
-
-      # Check for known NT books
-      return Testament.find_by(name: 'New') if nt_books.include?(book_name)
-
-      # Apocryphal/Deuterocanonical books are OT-era (using normalized names)
-      apocryphal_books = %w[
-        Tobit Judith Wisdom Sirach Baruch
-        1\ Maccabees 2\ Maccabees 3\ Maccabees 4\ Maccabees
-        1\ Esdras 2\ Esdras
-        Bel\ and\ the\ Dragon Susanna
-        Prayer\ of\ Azariah Prayer\ of\ Manasses
-        Additions\ to\ Esther
-        1\ Enoch
-        Odes
-      ]
-      return Testament.find_by(name: 'Old') if apocryphal_books.include?(book_name)
-
-      # Fallback: use position (first ~40% likely OT, rest NT)
-      # Default to OT if uncertain (safer assumption)
-      if position <= (total_books * 0.4)
-        Testament.find_by(name: 'Old')
-      else
-        Testament.find_by(name: 'New')
-      end
-    end
-
     def bootstrap!(base_path)
-      puts 'Creating testaments...'
-      create_testaments
-
       print 'Loading bible types...'
       create_bibles(base_path)
       puts " #{Bible.count}"

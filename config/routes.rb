@@ -38,7 +38,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :testaments, param: :uuid, only: %i[index show]
   resources :books, param: :uuid, only: %i[index show]
   resources :bibles, param: :uuid, only: %i[index show] do
     resources :books, param: :uuid, only: %i[index show], controller: 'books'

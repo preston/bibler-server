@@ -1,4 +1,4 @@
-json.extract! study, :uuid, :title, :goal, :visibility, :metadata, :created_at, :updated_at
+json.extract! study, :uuid, :title, :goal, :visibility, :created_at, :updated_at
 json.total_duration_minutes (defined?(total_duration_minutes) ? total_duration_minutes.to_i : 0)
 if study.owner
   json.owner do
