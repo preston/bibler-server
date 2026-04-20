@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   post '/ai/comparator_commentary', to: 'ai#comparator_commentary'
 
   resources :studies, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
+    post :transfer_owner, on: :member
+    get 'assignments', to: 'study_assignments#index'
+    post 'assignments', to: 'study_assignments#create'
+    delete 'assignments/:user_id', to: 'study_assignments#destroy'
     resource :role, controller: :study_roles, only: %i[show update], defaults: { format: :json }
     get '/modes', to: 'study_roles#show'
     match '/modes/mode', to: 'study_roles#update', via: %i[patch put post]

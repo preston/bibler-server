@@ -6,6 +6,8 @@ class User < ApplicationRecord
   has_and_belongs_to_many :roles, join_table: :roles_users
   has_many :study_answers, dependent: :nullify
   has_many :study_plan_item_user_states, dependent: :destroy
+  has_many :study_assignments, dependent: :destroy
+  has_many :co_led_studies, through: :study_assignments, source: :study
 
   has_secure_token :api_token
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 1) do
+ActiveRecord::Schema[8.1].define(version: 2) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,6 +103,16 @@ ActiveRecord::Schema[8.1].define(version: 1) do
     t.index ["study_question_id", "created_at"], name: "index_study_answers_on_study_question_id_and_created_at"
     t.index ["study_question_id"], name: "index_study_answers_on_study_question_id"
     t.index ["user_id"], name: "index_study_answers_on_user_id"
+  end
+
+  create_table "study_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.uuid "study_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["study_id", "user_id"], name: "index_study_assignments_on_study_id_and_user_id", unique: true
+    t.index ["study_id"], name: "index_study_assignments_on_study_id"
+    t.index ["user_id"], name: "index_study_assignments_on_user_id"
   end
 
   create_table "study_commentaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -232,6 +242,8 @@ ActiveRecord::Schema[8.1].define(version: 1) do
   add_foreign_key "study_answers", "study_commentaries"
   add_foreign_key "study_answers", "study_questions"
   add_foreign_key "study_answers", "users"
+  add_foreign_key "study_assignments", "studies"
+  add_foreign_key "study_assignments", "users"
   add_foreign_key "study_commentaries", "studies"
   add_foreign_key "study_plan_item_user_states", "study_plan_items"
   add_foreign_key "study_plan_item_user_states", "users"

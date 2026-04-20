@@ -1,2 +1,2 @@
 json.study_uuid @study.uuid
-json.capabilities @study.capabilities_for(@study_mode)
+json.capabilities @study.capabilities_for_viewer(current_user)

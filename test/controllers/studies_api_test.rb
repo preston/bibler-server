@@ -9,6 +9,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     @question = study_questions(:one)
     @task = study_tasks(:one)
     @auth_one = { 'Authorization' => "Bearer #{users(:one).api_token}" }
+    @auth_two = { 'Authorization' => "Bearer #{users(:two).api_token}" }
   end
 
   test 'creates and fetches a study by uuid' do
@@ -30,29 +31,26 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     assert_equal 'New Study', body.dig('study', 'title')
   end
 
-  test 'supports mode capability hints' do
-    get "/studies/#{@study.uuid}.json", params: { mode: 'leader' }, headers: @auth_one
+  test 'serializes RBAC capabilities for study owner' do
+    get "/studies/#{@study.uuid}.json", headers: @auth_one
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal true, body.dig('study', 'capabilities', 'can_edit_structure')
     assert_equal true, body.dig('study', 'capabilities', 'can_reorder_content')
     assert_equal true, body.dig('study', 'capabilities', 'can_delete_study')
+    assert_includes body.dig('study', 'available_study_modes'), 'leader'
   end
 
-  test 'co-leader cannot delete entire study' do
-    get "/studies/#{@study.uuid}.json", params: { mode: 'co-leader' }, headers: @auth_one
+  test 'co-leader cannot delete entire study via capabilities' do
+    get "/studies/#{@study.uuid}.json", headers: @auth_two
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal false, body.dig('study', 'capabilities', 'can_delete_study')
-  end
-
-  test 'leader can destroy study' do
-    delete "/studies/#{@study.uuid}.json", params: { mode: 'leader' }, headers: @auth_one
-    assert_response :no_content
+    assert_includes body.dig('study', 'available_study_modes'), 'co-leader'
   end
 
   test 'co-leader cannot destroy study' do
-    delete "/studies/#{studies(:two).uuid}.json", params: { mode: 'co-leader' }
+    delete "/studies/#{@study.uuid}.json", headers: @auth_two
     assert_response :forbidden
   end
 
@@ -62,7 +60,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         prompt: 'What does this verse command?',
         question_type: 'discussion'
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
     question_uuid = JSON.parse(response.body).dig('question', 'uuid')
 
@@ -72,7 +70,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         visibility: 'study',
         author_label: 'Participant'
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'participant')
+    }, headers: @auth_one
     assert_response :created
 
     post "/studies/#{@study.uuid}/tasks.json", params: {
@@ -81,22 +79,22 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         task_type: 'reading',
         status: 'open'
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
   end
 
   test 'reorders questions and tasks by uuid sequence' do
     q2 = StudyQuestion.create!(study: @study, prompt: 'Second prompt', question_type: 'discussion', position: 1)
     post "/studies/#{@study.uuid}/questions/reorder.json",
-         params: { ordered_uuids: [q2.uuid, @question.uuid], mode: 'leader' },
-         headers: @auth_one.merge('X-Study-Mode' => 'leader')
+         params: { ordered_uuids: [q2.uuid, @question.uuid] },
+         headers: @auth_one
     assert_response :success
     assert_equal [q2.uuid, @question.uuid], @study.study_questions.ordered.pluck(:uuid).first(2)
 
     t2 = StudyTask.create!(study: @study, instruction: 'Second task', task_type: 'reading', status: 'open', position: 1)
     post "/studies/#{@study.uuid}/tasks/reorder.json",
-         params: { ordered_uuids: [t2.uuid, @task.uuid], mode: 'leader' },
-         headers: @auth_one.merge('X-Study-Mode' => 'leader')
+         params: { ordered_uuids: [t2.uuid, @task.uuid] },
+         headers: @auth_one
     assert_response :success
     assert_equal [t2.uuid, @task.uuid], @study.study_tasks.ordered.pluck(:uuid).first(2)
   end
@@ -109,7 +107,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         notes: 'Welcome everyone',
         anchor: 'intro'
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
     item_uuid = JSON.parse(response.body).dig('plan_item', 'uuid')
     assert_equal 5, JSON.parse(response.body).dig('plan_item', 'duration')
@@ -119,14 +117,13 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     assert_includes JSON.parse(response.body).fetch('plan_items').map { |i| i['uuid'] }, item_uuid
 
     patch "/studies/#{@study.uuid}/plan_items/#{item_uuid}.json", params: {
-      mode: 'leader',
       study_plan_item: { title: 'Opening Prayer' }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :success
 
     post "/studies/#{@study.uuid}/plan_items/reorder.json",
-         params: { ordered_uuids: [item_uuid], mode: 'leader' },
-         headers: @auth_one.merge('X-Study-Mode' => 'leader')
+         params: { ordered_uuids: [item_uuid] },
+         headers: @auth_one
     assert_response :success
   end
 
@@ -138,15 +135,14 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         notes: '',
         duration: 12
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
     item_uuid = JSON.parse(response.body).dig('plan_item', 'uuid')
     assert_equal 12, JSON.parse(response.body).dig('plan_item', 'duration')
 
     patch "/studies/#{@study.uuid}/plan_items/#{item_uuid}.json", params: {
-      mode: 'leader',
       study_plan_item: { duration: 0 }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :success
     assert_nil JSON.parse(response.body).dig('plan_item', 'duration')
   end
@@ -158,7 +154,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
         task_type: 'create',
         status: 'open'
       }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
     assert_equal 'create', JSON.parse(response.body).dig('task', 'task_type')
   end
@@ -166,13 +162,13 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
   test 'plan item user state persists per authenticated user' do
     post "/studies/#{@study.uuid}/plan_items.json", params: {
       study_plan_item: { title: 'State step', item_type: 'custom', notes: '' }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :created
     item_uuid = JSON.parse(response.body).dig('plan_item', 'uuid')
 
     patch "/studies/#{@study.uuid}/plan_items/#{item_uuid}/state.json",
           params: { status: 'revisit' },
-          headers: @auth_one.merge('X-Study-Mode' => 'participant')
+          headers: @auth_one
     assert_response :success
     assert_equal 'revisit', JSON.parse(response.body).dig('plan_item', 'my_status')
 
@@ -186,7 +182,7 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     study = studies(:two)
     post "/studies/#{study.uuid}/plan_items.json", params: {
       study_plan_item: { title: 'Auth step', item_type: 'custom', notes: '' }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     item_uuid = JSON.parse(response.body).dig('plan_item', 'uuid')
 
     patch "/studies/#{study.uuid}/plan_items/#{item_uuid}/state.json", params: { status: 'complete' }
@@ -225,12 +221,16 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
 
   test 'ignores deprecated study metadata payload on update' do
     patch "/studies/#{@study.uuid}.json", params: {
-      mode: 'leader',
       study: { metadata: { selected_bible_uuids: ['x'], keep_me: 'yes' }, title: 'Metadata Ignored' }
-    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    }, headers: @auth_one
     assert_response :success
 
     @study.reload
     assert_equal 'Metadata Ignored', @study.title
+  end
+
+  test 'owner can destroy study' do
+    delete "/studies/#{@study.uuid}.json", headers: @auth_one
+    assert_response :no_content
   end
 end

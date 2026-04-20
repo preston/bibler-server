@@ -31,7 +31,7 @@ class StudyAiAssistantApiContractTest < ActionDispatch::IntegrationTest
 
   setup do
     @study = studies(:one)
-    @auth = { 'Authorization' => "Bearer #{users(:one).api_token}", 'X-Study-Mode' => 'leader' }
+    @auth = { 'Authorization' => "Bearer #{users(:one).api_token}" }
     @bible = bibles(:test1)
     @book_uuid = books(:genesis_test1).uuid
   end

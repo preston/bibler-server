@@ -12,18 +12,11 @@ class ApplicationController < ActionController::Base
   end
 
   def current_access_principal
-    return current_user if current_user
-
-    GuestPrincipal.new(requested_study_mode)
+    current_user
   end
 
   def current_ability
-    @current_ability ||= Ability.new(current_access_principal, requested_study_mode: requested_study_mode)
-  end
-
-  def requested_study_mode
-    mode = params[:mode].presence || request.headers['X-Study-Mode'].presence || 'participant'
-    Study::MODES.include?(mode) ? mode : 'participant'
+    @current_ability ||= Ability.new(current_access_principal)
   end
 
   private

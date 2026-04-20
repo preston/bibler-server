@@ -219,4 +219,52 @@ else
   admin_user.update!(email: admin_user.email.presence || 'administrator@localhost', name: admin_user.name.presence || 'Administrator')
 end
 admin_user.roles << admin_role unless admin_user.roles.include?(admin_role)
+
+# Eight non-administrator users covering every combination of bibles / access / curation.
+seed_password = 'password'
+seed_permission_users = [
+  { username: 'seed_none', name: 'Seed (no extra perms)', bibles: false, access: false, curation: false },
+  { username: 'seed_bibles', name: 'Seed (bibles)', bibles: true, access: false, curation: false },
+  { username: 'seed_access', name: 'Seed (access)', bibles: false, access: true, curation: false },
+  { username: 'seed_curation', name: 'Seed (curation)', bibles: false, access: false, curation: true },
+  { username: 'seed_bibles_access', name: 'Seed (bibles + access)', bibles: true, access: true, curation: false },
+  { username: 'seed_bibles_curation', name: 'Seed (bibles + curation)', bibles: true, access: false, curation: true },
+  { username: 'seed_access_curation', name: 'Seed (access + curation)', bibles: false, access: true, curation: true },
+  { username: 'seed_all', name: 'Seed (bibles + access + curation)', bibles: true, access: true, curation: true }
+]
+
+seed_permission_users.each do |cfg|
+  parts = []
+  parts << 'bibles' if cfg[:bibles]
+  parts << 'access' if cfg[:access]
+  parts << 'curation' if cfg[:curation]
+  role_label = parts.empty? ? '(none)' : parts.join(' + ')
+  role_name = "Seed #{role_label}"
+
+  role = Role.find_or_create_by!(name: role_name) do |r|
+    r.is_default = false
+    r.administrator = false
+    r.bibles = cfg[:bibles]
+    r.access = cfg[:access]
+    r.curation = cfg[:curation]
+  end
+  # Keep flags in sync if the role already existed.
+  role.update!(
+    administrator: false,
+    bibles: cfg[:bibles],
+    access: cfg[:access],
+    curation: cfg[:curation]
+  )
+
+  email = "#{cfg[:username]}@localhost"
+  user = User.find_or_initialize_by(username: cfg[:username])
+  user.email = email
+  user.name = cfg[:name]
+  user.password = seed_password
+  user.password_confirmation = seed_password
+  user.save!
+  user.roles << role unless user.roles.include?(role)
+end
+
 puts 'RBAC bootstrap complete.'
+

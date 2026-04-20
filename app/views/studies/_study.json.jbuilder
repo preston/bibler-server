@@ -1,5 +1,8 @@
 json.extract! study, :uuid, :title, :goal, :visibility, :created_at, :updated_at
 json.total_duration_minutes (defined?(total_duration_minutes) ? total_duration_minutes.to_i : 0)
+viewer = local_assigns[:viewer]
+json.available_study_modes study.available_study_modes_for(viewer)
+json.my_study_role study.my_study_role_for(viewer)
 if study.owner
   json.owner do
     json.id study.owner.id
@@ -8,7 +11,7 @@ if study.owner
   end
 end
 json.ai_default_reference_bibles Bible.default_ai_reference_bibles
-json.capabilities study.capabilities_for(mode)
+json.capabilities study.capabilities_for_viewer(viewer)
 json.paths do
   json.self study_path(study.uuid, format: :json)
   json.verses study_study_verses_path(study.uuid, format: :json)

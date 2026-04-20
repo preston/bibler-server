@@ -11,7 +11,7 @@ class StudiesController < ApplicationController
   DEFAULT_PER_PAGE = 25
   MAX_PER_PAGE = 100
 
-  before_action :set_study, only: %i[show update destroy]
+  before_action :set_study, only: %i[show update destroy transfer_owner]
 
   def index
     if params[:scope].to_s == 'owned'
@@ -45,12 +45,12 @@ class StudiesController < ApplicationController
       direction: dir,
       q: q
     }
-    @study_mode = requested_study_mode
+    @viewer = current_user
   end
 
   def show
     authorize! :read, @study
-    @study_mode = requested_study_mode
+    @viewer = current_user
   end
 
   def create
@@ -60,7 +60,7 @@ class StudiesController < ApplicationController
     authorize! :create, Study
     @study = Study.new(study_params)
     @study.owner = current_user
-    @study_mode = requested_study_mode
+    @viewer = current_user
     if @study.save
       render :show, status: :created
     else
@@ -70,7 +70,7 @@ class StudiesController < ApplicationController
 
   def update
     authorize! :update, @study
-    @study_mode = requested_study_mode
+    @viewer = current_user
     if @study.update(study_params)
       render :show, status: :ok
     else
@@ -79,9 +79,39 @@ class StudiesController < ApplicationController
   end
 
   def destroy
-    authorize! :destroy, @study
+    authorize! :destroy_study, @study
     @study.destroy
     head :no_content
+  end
+
+  def transfer_owner
+    authorize! :transfer_ownership, @study
+    target_id = params[:user_id].presence || params.dig(:transfer, :user_id)
+    target = User.find_by(id: target_id)
+    unless target
+      render json: { error: 'User not found.' }, status: :unprocessable_entity
+      return
+    end
+
+    unless @study.study_assignments.exists?(user_id: target.id)
+      render json: { error: 'Target must be an existing co-leader.' }, status: :unprocessable_entity
+      return
+    end
+
+    old_owner_id = @study.owner_id
+    if old_owner_id == target.id
+      render json: { error: 'That user is already the owner.' }, status: :unprocessable_entity
+      return
+    end
+
+    Study.transaction do
+      @study.study_assignments.where(user_id: target.id).destroy_all
+      @study.update!(owner: target)
+      StudyAssignment.find_or_create_by!(study_id: @study.id, user_id: old_owner_id)
+    end
+
+    @viewer = current_user
+    render :show, status: :ok
   end
 
   private
@@ -89,7 +119,10 @@ class StudiesController < ApplicationController
   def index_scope
     case params[:scope].to_s
     when 'owned'
-      Study.where(owner_id: current_user.id)
+      Study
+        .left_outer_joins(:study_assignments)
+        .where('studies.owner_id = :uid OR study_assignments.user_id = :uid', uid: current_user.id)
+        .distinct
     else
       Study.where(visibility: 'public')
     end

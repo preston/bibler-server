@@ -34,7 +34,7 @@ class AiApiTest < ActionDispatch::IntegrationTest
   test 'study ai route returns structured error when unconfigured' do
     previous = ENV['BIBLER_SERVER_OLLAMA_URL']
     ENV['BIBLER_SERVER_OLLAMA_URL'] = nil
-    post "/studies/#{@study.uuid}/ai/summarize", params: { prompt: 'summarize' }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    post "/studies/#{@study.uuid}/ai/summarize", params: { prompt: 'summarize' }, headers: @auth_one
     assert_response :unprocessable_entity
     body = JSON.parse(response.body)
     assert body['error'].present?
