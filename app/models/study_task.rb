@@ -4,7 +4,7 @@
 class StudyTask < ApplicationRecord
   belongs_to :study
 
-  TASK_TYPES = %w[discussion reading prayer memorization reflection].freeze
+  TASK_TYPES = %w[discussion reading prayer memorization reflection create].freeze
   STATUSES = %w[open in_progress completed archived].freeze
 
   before_validation :ensure_uuid

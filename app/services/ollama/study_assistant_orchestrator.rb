@@ -480,6 +480,7 @@ module Ollama
       when 'reading' then 'add_task'
       when 'commentary', 'comment', 'notes', 'reflection' then 'add_commentary'
       when 'task', 'activity', 'add_activity' then 'add_task'
+      when 'create', 'creative', 'add_create_step', 'create_step' then 'add_task'
       when 'question', 'prompt' then 'add_question'
       when 'worship', 'song', 'music', 'hymn' then 'add_worship'
       when 'prayer' then 'add_task'
@@ -503,6 +504,7 @@ module Ollama
         payload = h['payload']
         payload = payload.is_a?(Hash) ? payload.stringify_keys : {}
         payload = enrich_add_verse_payload(payload) if type == 'add_verse'
+        payload = normalize_add_task_payload(payload) if type == 'add_task'
 
         out << {
           'order' => out.length,
@@ -518,6 +520,26 @@ module Ollama
       Rails.logger.info("[StudyAssistant] truncated suggestions from #{list.length} to #{MAX_SUGGESTIONS}") if list.length > MAX_SUGGESTIONS
 
       out
+    end
+
+    def normalize_add_task_payload(payload)
+      p = payload.stringify_keys
+      normalized_type = normalize_suggestion_type_token(p['task_type'])
+      type_aliases = {
+        'plan' => 'discussion',
+        'planning' => 'discussion',
+        'write' => 'create',
+        'writing' => 'create',
+        'journal' => 'reflection',
+        'journaling' => 'reflection',
+        'meditation' => 'reflection'
+      }
+      normalized_type = type_aliases[normalized_type] || normalized_type
+      p['task_type'] = StudyTask::TASK_TYPES.include?(normalized_type) ? normalized_type : 'discussion'
+
+      normalized_status = normalize_suggestion_type_token(p['status'])
+      p['status'] = StudyTask::STATUSES.include?(normalized_status) ? normalized_status : 'open'
+      p
     end
 
     def study_verse_snapshot_hash(sv)

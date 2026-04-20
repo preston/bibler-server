@@ -171,6 +171,46 @@ module Ollama
       assert_equal 'add_task', result[:suggestions][0]['type']
     end
 
+    test 'round b coerces create type to add_task' do
+      round_b = '{"suggestions":[{"id":"c-create","type":"create","title":"Create response","summary":"Create something tangible.","payload":{"instruction":"Draft a response","task_type":"create"}}]}'
+      orch = StudyAssistantOrchestrator.new(
+        study: studies(:one),
+        user_message: 'help me study',
+        chat_service: FakeChat.new(['{"searches":[]}', round_b])
+      )
+      result = orch.call
+      assert_nil result[:error]
+      assert_equal 1, result[:suggestions].size
+      assert_equal 'add_task', result[:suggestions][0]['type']
+    end
+
+    test 'round b normalizes add_task payload task_type and status to valid enums' do
+      round_b = '{"suggestions":[{"id":"task-enum","type":"add_task","title":"Do work","summary":"S","payload":{"instruction":"Do work","task_type":"planning","status":"working"}}]}'
+      orch = StudyAssistantOrchestrator.new(
+        study: studies(:one),
+        user_message: 'help me study',
+        chat_service: FakeChat.new(['{"searches":[]}', round_b])
+      )
+      result = orch.call
+      assert_nil result[:error]
+      assert_equal 1, result[:suggestions].size
+      payload = result[:suggestions][0]['payload']
+      assert_equal 'discussion', payload['task_type']
+      assert_equal 'open', payload['status']
+    end
+
+    test 'round b maps writing task_type to create' do
+      round_b = '{"suggestions":[{"id":"task-writing","type":"add_task","title":"Write","summary":"S","payload":{"instruction":"Write","task_type":"writing"}}]}'
+      orch = StudyAssistantOrchestrator.new(
+        study: studies(:one),
+        user_message: 'help me study',
+        chat_service: FakeChat.new(['{"searches":[]}', round_b])
+      )
+      result = orch.call
+      assert_nil result[:error]
+      assert_equal 'create', result[:suggestions][0]['payload']['task_type']
+    end
+
     test 'round b parses double-encoded JSON string payload' do
       inner = '{"suggestions":[{"id":"e1","type":"add_commentary","title":"Note","summary":"S","payload":{"source_type":"manual","title":"t","body":"b"}}]}'
       round_b = inner.to_json
@@ -295,6 +335,37 @@ module Ollama
       ).call
       body = captured.first.to_s
       refute_includes body, '"abbreviation":"TEST2"', 'prompt should not list unrelated Bibles from the full catalog'
+    end
+
+    test 'round b prompt enables long-form guidance for sermon requests' do
+      prompt = Ollama::Prompts::StudyAssistant.round_b_user_content(
+        user_message: 'Generate a sermon manuscript on Romans 8',
+        snapshot: {},
+        catalog: [],
+        selected_refs: [],
+        search_result: { verses: [], errors: [] },
+        max_suggestions: 4,
+        suggestion_types: %w[add_commentary]
+      )
+
+      assert_includes prompt, 'SERMON LONG-FORM MODE'
+      assert_includes prompt, 'about 130-170 words per paragraph'
+      assert_includes prompt, 'do not use normal short-note limits'
+    end
+
+    test 'round b prompt keeps short-note guidance for non-sermon requests' do
+      prompt = Ollama::Prompts::StudyAssistant.round_b_user_content(
+        user_message: 'Build a discussion plan for John 3',
+        snapshot: {},
+        catalog: [],
+        selected_refs: [],
+        search_result: { verses: [], errors: [] },
+        max_suggestions: 4,
+        suggestion_types: %w[add_question]
+      )
+
+      refute_includes prompt, 'SERMON LONG-FORM MODE'
+      assert_includes prompt, 'For non-sermon requests: aim for about one sentence up to two short paragraphs'
     end
   end
 end

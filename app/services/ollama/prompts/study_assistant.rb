@@ -10,6 +10,7 @@ module Ollama
 
       # Cap verses embedded in round 2 so the model stays within context and can finish valid JSON.
       ROUND_B_VERSE_CAP = 80
+      SERMON_INTENT_HINT = /\b(sermon|sermons|homily|preach|preaching)\b/i
 
       def search_system_prompt
         <<~PROMPT.strip
@@ -121,6 +122,19 @@ module Ollama
             ''
           end
 
+        sermon_long_form_block =
+          if user_message.to_s.match?(SERMON_INTENT_HINT)
+            <<~BLOCK.strip
+              SERMON LONG-FORM MODE (applies because the user asked for a sermon/homily/preaching content):
+              - Ignore normal brevity limits for writing quality and depth.
+              - For add_commentary (and any summary that is drafting manuscript-style text), write long-form prose suitable for spoken delivery.
+              - Target approximately one minute of speaking per paragraph (about 130-170 words per paragraph).
+              - Prefer complete manuscript-style paragraphs over short bullets.
+            BLOCK
+          else
+            ''
+          end
+
         <<~PROMPT
           ROUND 2 — SUGGESTIONS (JSON ONLY)
 
@@ -138,10 +152,15 @@ module Ollama
           - For add_verse payload: REQUIRED verse_uuid (string) — MUST match a verse_uuid from DATABASE_RESULTS.verses or an entry in STUDY_SNAPSHOT.verses. Optional note. Do not paste full verse text into the payload; coordinates are derived server-side from verse_uuid.
           - For add_commentary: source_type (manual|ai), title, body, optional prompt, optional duration.
           - For add_question: prompt, question_type (discussion|observation|interpretation|application), optional guidance_notes, optional duration.
-          - For add_task: instruction, task_type (discussion|reading|prayer|memorization|reflection), optional assignee_label, optional duration.
+          - For add_task: instruction, task_type (discussion|reading|prayer|memorization|reflection|create), optional assignee_label, optional duration.
+          - `task_type` MUST be exactly one of those values above; never invent a new task_type label.
           - For add_worship: optional resource_url (string), optional worship_format (song|video|other), optional note in payload; use title and summary for the plan step.
           - Never invent verse text; summaries may paraphrase only what DATABASE_RESULTS contain.
-          - Each "summary" is stored as the plan step's notes in the UI: aim for about one sentence up to two short paragraphs (not only a title or a single short phrase unless that truly suffices); stay grounded in DATABASE_RESULTS and STUDY_SNAPSHOT.
+          #{sermon_long_form_block}
+          - Each "summary" is stored as the plan step's notes in the UI:
+            - For sermon requests: do not use normal short-note limits; allow long-form writing, with about one minute of speaking per paragraph.
+            - For non-sermon requests: aim for about one sentence up to two short paragraphs (not only a title or a single short phrase unless that truly suffices).
+            - In all cases, stay grounded in DATABASE_RESULTS and STUDY_SNAPSHOT.
           - Order suggestions by priority: the first suggestion in the array is the most important; preserve that order in the JSON array.
           #{sparse_hint}
           #{verse_scope_note}

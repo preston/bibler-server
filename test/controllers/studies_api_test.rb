@@ -151,6 +151,18 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     assert_nil JSON.parse(response.body).dig('plan_item', 'duration')
   end
 
+  test 'accepts create as a task type' do
+    post "/studies/#{@study.uuid}/tasks.json", params: {
+      study_task: {
+        instruction: 'Create something tangible',
+        task_type: 'create',
+        status: 'open'
+      }
+    }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
+    assert_response :created
+    assert_equal 'create', JSON.parse(response.body).dig('task', 'task_type')
+  end
+
   test 'plan item user state persists per authenticated user' do
     post "/studies/#{@study.uuid}/plan_items.json", params: {
       study_plan_item: { title: 'State step', item_type: 'custom', notes: '' }
