@@ -4,7 +4,15 @@
 class Verse < ApplicationRecord
   include PgSearch::Model
   # multisearchable :against => [:text]
-  pg_search_scope :search_by_text, against: :text
+  # prefix: partial-word match; any_word: OR multi-token queries (better recall for study assistant & verse search)
+  pg_search_scope :search_by_text,
+                  against: :text,
+                  using: {
+                    tsearch: {
+                      prefix: true,
+                      any_word: true
+                    }
+                  }
 
   belongs_to	:bible
   belongs_to	:book

@@ -133,6 +133,7 @@ class StudiesController < ApplicationController
       base = @study&.persisted? && @study.metadata.is_a?(Hash) ? @study.metadata.deep_stringify_keys : {}
       merged = base.merge(incoming)
       merged.delete('ai_system_prompt')
+      merged.delete('selected_bible_uuids')
       permitted[:metadata] = merged
     end
     permitted

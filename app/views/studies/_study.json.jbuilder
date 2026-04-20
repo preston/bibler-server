@@ -8,7 +8,6 @@ if study.owner
   end
 end
 json.ai_default_reference_bibles Bible.default_ai_reference_bibles
-json.selected_bible_uuids study.selected_bible_uuids
 json.capabilities study.capabilities_for(mode)
 json.paths do
   json.self study_path(study.uuid, format: :json)

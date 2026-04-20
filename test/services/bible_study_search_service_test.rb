@@ -25,4 +25,15 @@ class BibleStudySearchServiceTest < ActiveSupport::TestCase
     assert_operator result[:errors].size, :>, 0
     assert_empty result[:verses]
   end
+
+  test 'deduplicates verses when the same row is matched by repeated searches' do
+    bible = bibles(:test1)
+    result = BibleStudySearchService.call(searches: [
+      { bible_uuid: bible.uuid, text: 'Lorem', limit: 5 },
+      { bible_uuid: bible.uuid, text: 'Lorem', limit: 5 }
+    ])
+
+    uuids = result[:verses].map { |r| r[:verse_uuid] }
+    assert_equal uuids.uniq.size, uuids.size
+  end
 end

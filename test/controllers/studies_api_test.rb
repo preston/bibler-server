@@ -211,19 +211,16 @@ class StudiesApiTest < ActionDispatch::IntegrationTest
     assert_equal 3, row['total_duration_minutes']
   end
 
-  test 'persists and serializes selected study bible uuids' do
+  test 'strips selected_bible_uuids from study metadata on update' do
     uuids = Bible.limit(2).pluck(:uuid)
     patch "/studies/#{@study.uuid}.json", params: {
       mode: 'leader',
-      study: { metadata: { selected_bible_uuids: uuids } }
+      study: { metadata: { selected_bible_uuids: uuids, keep_me: 'yes' } }
     }, headers: @auth_one.merge('X-Study-Mode' => 'leader')
     assert_response :success
-    body = JSON.parse(response.body)
-    assert_equal uuids, body.dig('study', 'selected_bible_uuids')
 
-    get "/studies/#{@study.uuid}.json", params: { mode: 'leader' }, headers: @auth_one
-    assert_response :success
-    show_body = JSON.parse(response.body)
-    assert_equal uuids, show_body.dig('study', 'selected_bible_uuids')
+    @study.reload
+    assert_equal 'yes', @study.metadata['keep_me']
+    refute @study.metadata.key?('selected_bible_uuids')
   end
 end

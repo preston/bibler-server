@@ -13,7 +13,13 @@ module Ollama
       end
 
       begin
-        return JSON.parse(stripped)
+        parsed = JSON.parse(stripped)
+        # Some models double-encode JSON (outer value is a JSON string containing an object/array).
+        if parsed.is_a?(String)
+          inner = parsed.strip
+          return parse_object(inner) if inner.start_with?('{', '[')
+        end
+        return parsed
       rescue JSON::ParserError
         i = stripped.index('{')
         j = stripped.rindex('}')

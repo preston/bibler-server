@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_20_012336) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -200,12 +200,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_000000) do
     t.datetime "updated_at", null: false
     t.string "uuid", null: false
     t.text "verse_text"
+    t.string "verse_uuid"
     t.index ["bible_uuid"], name: "index_study_verses_on_bible_uuid"
     t.index ["book_uuid"], name: "index_study_verses_on_book_uuid"
     t.index ["study_id", "bible_uuid", "book_uuid", "chapter", "ordinal"], name: "idx_study_verses_lookup_uuid"
     t.index ["study_id", "position"], name: "index_study_verses_on_study_id_and_position"
     t.index ["study_id"], name: "index_study_verses_on_study_id"
     t.index ["uuid"], name: "index_study_verses_on_uuid", unique: true
+    t.index ["verse_uuid"], name: "index_study_verses_on_verse_uuid"
   end
 
   create_table "testaments", id: :serial, force: :cascade do |t|

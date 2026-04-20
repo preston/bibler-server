@@ -32,11 +32,9 @@ class Study < ApplicationRecord
     }
   end
 
+  # Per-study Bible selection was removed; scripture context uses system AI default Bibles only.
   def selected_bible_uuids
-    raw = metadata.is_a?(Hash) ? metadata['selected_bible_uuids'] : nil
-    return [] unless raw.is_a?(Array)
-
-    raw.map(&:to_s).map(&:strip).reject(&:blank?).uniq
+    []
   end
 
   private

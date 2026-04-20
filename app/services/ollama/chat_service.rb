@@ -78,10 +78,12 @@ module Ollama
     end
 
     # Streaming chat; yields accumulated text via on_delta for each Ollama chunk.
-    def chat_with_system_stream(system_message:, user_content:, model: nil, on_delta: nil)
+    # Optional +format+ (e.g. "json") is passed to Ollama for structured output.
+    def chat_with_system_stream(system_message:, user_content:, model: nil, on_delta: nil, format: nil)
       accumulated = +''
       result = @client.chat_stream(
         model: model,
+        format: format,
         messages: [
           { role: 'system', content: system_message },
           { role: 'user', content: user_content }

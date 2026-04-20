@@ -40,7 +40,8 @@ module Ollama
     end
 
     # Yields each parsed JSON object from Ollama's NDJSON stream. Returns final merged hash or error hash.
-    def chat_stream(model:, messages:, &block)
+    # Optional +format+ matches non-streaming chat (e.g. "json" for structured Round-A output).
+    def chat_stream(model:, messages:, format: nil, &block)
       return unconfigured_error unless self.class.configured?
 
       payload = {
@@ -48,6 +49,7 @@ module Ollama
         messages: messages,
         stream: true
       }
+      payload[:format] = format if format.present?
 
       request_chat_stream('/api/chat', payload: payload, &block)
     end

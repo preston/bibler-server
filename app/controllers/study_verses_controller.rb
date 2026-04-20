@@ -7,7 +7,7 @@ class StudyVersesController < ApplicationController
   before_action :set_study_verse, only: %i[update destroy]
 
   def index
-    @study_verses = @study.study_verses.ordered
+    @study_verses = @study.study_verses.ordered.includes(:verse)
   end
 
   def create
@@ -47,6 +47,6 @@ class StudyVersesController < ApplicationController
   end
 
   def study_verse_params
-    params.require(:study_verse).permit(:bible_uuid, :book_uuid, :chapter, :ordinal, :verse_text, :note, :position)
+    params.require(:study_verse).permit(:verse_uuid, :bible_uuid, :book_uuid, :chapter, :ordinal, :verse_text, :note, :position)
   end
 end

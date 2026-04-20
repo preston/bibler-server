@@ -6,6 +6,15 @@ test1:
   abbreviation: TEST1
   language: en
   license: Test License
+  ai_default_english: true
+
+test_hebrew_ot:
+  uuid: 00000000-0000-0000-0000-000000000103
+  name: Test Hebrew OT
+  abbreviation: HTEST
+  language: hbo
+  license: Test License
+  ai_default_hebrew_ot: true
 
 test2:
   uuid: 00000000-0000-0000-0000-000000000102

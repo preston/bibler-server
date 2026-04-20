@@ -5,12 +5,19 @@ module Studies
   class AiController < ApplicationController
     include ActionController::Live
     include StudyContext
-    MAX_ASSISTANT_STREAM_SECONDS = 120
+
+    # Wall-clock cap for the whole assistant run (two LLM rounds + search). Default matches a generous
+    # multi-minute local Ollama job; override with BIBLER_ASSISTANT_SSE_MAX_SECONDS (e.g. 900).
+    def self.max_assistant_stream_seconds
+      Integer(ENV.fetch('BIBLER_ASSISTANT_SSE_MAX_SECONDS', '600'))
+    rescue ArgumentError, TypeError
+      600
+    end
 
     def generate_commentary
       prompt_context = {
-        study: @study.slice(:uuid, :title, :goal).merge(selected_bible_uuids: @study.selected_bible_uuids),
-        verses: @study.study_verses.ordered.limit(30).map { |sv| sv.slice(:bible_uuid, :book_uuid, :chapter, :ordinal, :verse_text, :note) },
+        study: @study.slice(:uuid, :title, :goal),
+        verses: @study.study_verses.ordered.includes(:verse).limit(30).map { |sv| study_verse_ai_slice(sv) },
         user_instruction: params[:instruction].to_s
       }
 
@@ -41,7 +48,7 @@ module Studies
     def generate_questions
       prompt_context = {
         study: @study.slice(:uuid, :title, :goal),
-        verses: @study.study_verses.ordered.limit(40).map { |sv| sv.slice(:bible_uuid, :book_uuid, :chapter, :ordinal, :verse_text) }
+        verses: @study.study_verses.ordered.includes(:verse).limit(40).map { |sv| study_verse_ai_slice(sv).except(:note) }
       }
       result = Ollama::ChatService.new.generate(
         prompt: params[:prompt].presence || 'Generate discussion questions anchored in scripture references from the provided study verses.',
@@ -60,7 +67,7 @@ module Studies
           user_message: params[:message].to_s,
           model: nil,
           stream: false,
-          reference_bible_uuids: params[:reference_bible_uuids]
+          target_duration_minutes: assistant_target_duration_minutes
         ).call
 
         status = Ollama::ChatService.response_error?(result) ? :unprocessable_entity : :ok
@@ -69,6 +76,27 @@ module Studies
     end
 
     private
+
+    def assistant_target_duration_minutes
+      v = params[:target_duration_minutes]
+      return nil if v.blank?
+
+      n = Integer(v, exception: false)
+      n = v.to_i if n.nil?
+      n.positive? ? n : nil
+    end
+
+    def study_verse_ai_slice(sv)
+      {
+        bible_uuid: sv.bible_uuid,
+        book_uuid: sv.book_uuid,
+        chapter: sv.chapter,
+        ordinal: sv.ordinal,
+        verse_uuid: sv.verse_uuid,
+        verse_text: (sv.verse&.text).presence || sv.verse_text,
+        note: sv.note
+      }
+    end
 
     def assistant_stream_requested?
       return true if params[:stream].to_s.in?(%w[1 true yes])
@@ -86,9 +114,11 @@ module Studies
       stream_started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       stream_closed = false
       writer = lambda do |h|
-        if !stream_closed && (Process.clock_gettime(Process::CLOCK_MONOTONIC) - stream_started_at) >= MAX_ASSISTANT_STREAM_SECONDS
+        if !stream_closed && (Process.clock_gettime(Process::CLOCK_MONOTONIC) - stream_started_at) >= self.class.max_assistant_stream_seconds
           stream_closed = true
-          response.stream.write("event: error\ndata: #{ { error: 'Assistant stream timed out.' }.to_json }\n\n")
+          response.stream.write(
+            "event: error\ndata: #{ { error: 'Assistant stream timed out.', hint: 'Set BIBLER_ASSISTANT_SSE_MAX_SECONDS (seconds) on the server if runs need longer.' }.to_json }\n\n"
+          )
           raise ActionController::Live::ClientDisconnected
         end
         name = h[:event].presence || 'message'
@@ -102,8 +132,8 @@ module Studies
           user_message: params[:message].to_s,
           model: nil,
           stream: true,
-          reference_bible_uuids: params[:reference_bible_uuids],
-          on_event: writer
+          on_event: writer,
+          target_duration_minutes: assistant_target_duration_minutes
         ).call
       rescue ActionController::Live::ClientDisconnected
         nil

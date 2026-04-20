@@ -2,13 +2,14 @@ class StudyPlanItem < ApplicationRecord
   belongs_to :study
   has_many :study_plan_item_user_states, dependent: :destroy
 
-  ITEM_TYPES = %w[verse commentary question task custom].freeze
+  ITEM_TYPES = %w[verse commentary question task custom worship].freeze
   DEFAULT_DURATIONS_BY_TYPE = {
     'verse' => 2,
     'question' => 7,
     'commentary' => 5,
     'task' => 5,
-    'custom' => 5
+    'custom' => 5,
+    'worship' => 5
   }.freeze
 
   before_validation :ensure_uuid
