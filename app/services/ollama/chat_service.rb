@@ -45,7 +45,7 @@ module Ollama
         model: model,
         messages: messages,
         format: ollama_format,
-        options: ollama_options
+        options: Ollama::InferenceOptions.merge(ollama_options)
       )
 
       return response if self.class.response_error?(response)

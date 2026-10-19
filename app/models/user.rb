@@ -8,6 +8,8 @@ class User < ApplicationRecord
   has_many :study_plan_item_user_states, dependent: :destroy
   has_many :study_assignments, dependent: :destroy
   has_many :co_led_studies, through: :study_assignments, source: :study
+  has_many :sermons, foreign_key: :user_id, dependent: :destroy, inverse_of: :owner
+  has_many :documents, dependent: :destroy
 
   has_secure_token :api_token
 

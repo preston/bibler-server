@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2) do
+ActiveRecord::Schema[8.1].define(version: 4) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,16 @@ ActiveRecord::Schema[8.1].define(version: 2) do
     t.check_constraint "testament::text = ANY (ARRAY['old'::character varying::text, 'new'::character varying::text, 'other'::character varying::text])", name: "check_books_testament_enum"
   end
 
+  create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "extracted_text", null: false
+    t.string "original_filename", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id", "updated_at"], name: "index_documents_on_user_id_and_updated_at"
+    t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
   create_table "mcp_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "initialized_at", null: false
@@ -76,6 +86,46 @@ ActiveRecord::Schema[8.1].define(version: 2) do
     t.index ["role_id"], name: "index_roles_users_on_role_id"
     t.index ["user_id", "role_id"], name: "index_roles_users_on_user_id_and_role_id", unique: true
     t.index ["user_id"], name: "index_roles_users_on_user_id"
+  end
+
+  create_table "sermon_section_verses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "bible_uuid", null: false
+    t.string "book_uuid", null: false
+    t.integer "chapter", null: false
+    t.datetime "created_at", null: false
+    t.integer "ordinal", null: false
+    t.integer "position", default: 0, null: false
+    t.uuid "sermon_section_id", null: false
+    t.datetime "updated_at", null: false
+    t.text "verse_text"
+    t.string "verse_uuid"
+    t.index ["sermon_section_id", "position"], name: "index_sermon_section_verses_on_sermon_section_id_and_position"
+    t.index ["sermon_section_id"], name: "index_sermon_section_verses_on_sermon_section_id"
+    t.index ["verse_uuid"], name: "index_sermon_section_verses_on_verse_uuid"
+  end
+
+  create_table "sermon_sections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.integer "estimated_minutes"
+    t.integer "position", default: 0, null: false
+    t.uuid "sermon_id", null: false
+    t.string "title", default: "", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sermon_id", "position"], name: "index_sermon_sections_on_sermon_id_and_position"
+    t.index ["sermon_id"], name: "index_sermon_sections_on_sermon_id"
+  end
+
+  create_table "sermons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "target_duration_minutes"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.string "visibility", default: "private", null: false
+    t.index ["user_id", "updated_at"], name: "index_sermons_on_user_id_and_updated_at"
+    t.index ["user_id"], name: "index_sermons_on_user_id"
+    t.index ["visibility"], name: "index_sermons_on_visibility"
   end
 
   create_table "studies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -235,8 +285,12 @@ ActiveRecord::Schema[8.1].define(version: 2) do
   end
 
   add_foreign_key "books", "bibles"
+  add_foreign_key "documents", "users"
   add_foreign_key "roles_users", "roles"
   add_foreign_key "roles_users", "users"
+  add_foreign_key "sermon_section_verses", "sermon_sections"
+  add_foreign_key "sermon_sections", "sermons"
+  add_foreign_key "sermons", "users"
   add_foreign_key "studies", "users", column: "owner_id"
   add_foreign_key "study_answers", "studies"
   add_foreign_key "study_answers", "study_commentaries"

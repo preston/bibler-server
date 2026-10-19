@@ -12,6 +12,19 @@ Rails.application.routes.draw do
   post '/ai/chat', to: 'ai#chat'
   post '/ai/comparator_commentary', to: 'ai#comparator_commentary'
 
+  resources :documents, path: 'documents', param: :uuid, only: %i[index create update destroy], defaults: { format: :json }
+
+  resources :sermons, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
+    resources :sections, controller: 'sermon_sections', param: :uuid, only: %i[index create update destroy], defaults: { format: :json } do
+      resources :verses, controller: 'sermon_section_verses', param: :verse_uuid, only: %i[index create update destroy], defaults: { format: :json }
+    end
+
+    scope module: :sermons do
+      post 'ai/verse_pass', to: 'ai#verse_pass'
+      post 'ai/outline_pass', to: 'ai#outline_pass'
+    end
+  end
+
   resources :studies, param: :uuid, only: %i[index show create update destroy], defaults: { format: :json } do
     post :transfer_owner, on: :member
     get 'assignments', to: 'study_assignments#index'

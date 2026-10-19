@@ -4,6 +4,7 @@ class Ability
   include CanCan::Ability
 
   STUDY_NESTED = [StudyVerse, StudyCommentary, StudyQuestion, StudyTask, StudyPlanItem].freeze
+  SERMON_NESTED = [SermonSection, SermonSectionVerse].freeze
 
   def initialize(principal)
     if principal.is_a?(User)
@@ -33,6 +34,9 @@ class Ability
     can :read, User if perms[:access]
     can :manage, :system_ai_settings if perms[:bibles]
     can :read, :system_ai_settings if perms[:bibles]
+
+    apply_sermon_abilities_for_user(user)
+    apply_document_abilities_for_user(user)
   end
 
   def apply_study_abilities_for_user(user)
@@ -115,6 +119,80 @@ class Ability
     end
   end
 
+  def apply_sermon_abilities_for_user(user)
+    perms = user.effective_permissions || {}
+
+    can :read, Sermon do |sermon|
+      sermon_readable_by_user?(sermon, user, perms)
+    end
+
+    SERMON_NESTED.each do |klass|
+      can :read, klass do |obj|
+        st = sermon_for_nested(obj)
+        st ? sermon_readable_by_user?(st, user, perms) : false
+      end
+    end
+
+    can :create, Sermon do |subject|
+      if subject.is_a?(Class)
+        true
+      elsif subject.is_a?(Sermon) && !subject.persisted?
+        true
+      elsif subject.is_a?(Sermon)
+        sermon_editable_by_user?(subject, user, perms)
+      else
+        false
+      end
+    end
+
+    can :update, Sermon do |sermon|
+      sermon_editable_by_user?(sermon, user, perms)
+    end
+
+    can :destroy, Sermon do |sermon|
+      sermon_editable_by_user?(sermon, user, perms)
+    end
+
+    SERMON_NESTED.each do |klass|
+      can %i[create update destroy], klass do |obj|
+        st = sermon_for_nested(obj)
+        st && sermon_editable_by_user?(st, user, perms)
+      end
+    end
+  end
+
+  def apply_document_abilities_for_user(user)
+    can %i[read create update destroy], Document, user_id: user.id
+  end
+
+  def sermon_for_nested(obj)
+    case obj
+    when SermonSection
+      obj.sermon
+    when SermonSectionVerse
+      obj.sermon_section&.sermon
+    end
+  end
+
+  def sermon_readable_by_user?(sermon, user, perms)
+    return false unless sermon && user
+
+    return true if sermon.visibility != 'private'
+    return true if sermon.user_id == user.id
+    return true if perms[:curation]
+
+    false
+  end
+
+  def sermon_editable_by_user?(sermon, user, perms)
+    return false unless sermon && user
+
+    return true if perms[:curation]
+    return true if sermon.user_id == user.id
+
+    false
+  end
+
   def apply_guest_study_abilities
     can :read, Study do |study|
       guest_study_readable?(study)
@@ -130,6 +208,21 @@ class Ability
       st = answer.study_question&.study
       st ? guest_study_readable?(st) : false
     end
+
+    can :read, Sermon do |sermon|
+      guest_sermon_readable?(sermon)
+    end
+
+    SERMON_NESTED.each do |klass|
+      can :read, klass do |obj|
+        st = sermon_for_nested(obj)
+        st ? guest_sermon_readable?(st) : false
+      end
+    end
+  end
+
+  def guest_sermon_readable?(sermon)
+    sermon && sermon.visibility != 'private'
   end
 
   def study_readable_by_user?(study, user, perms)
